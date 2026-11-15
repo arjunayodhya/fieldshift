@@ -298,6 +298,8 @@ Claude Code). This section says what our team did and what the AI did.
 - **Proposed the website design:** a simple, farmer-friendly static page with a monthly chart of heat days, rain and
   frost with Jul–Aug highlighted, "what's changed" cards, a data-limits box, a crop trait table, and a comparison of
   the current rotation with alternatives, each with why, evidence, benefits, data gaps and risks.
+- **Proposed the scoring idea:** in a team brainstorm before the build, came up with scoring each rotation against
+  what the farmer cares about, so the tool can rank rotations by farmer priorities.
 - **Directed the build:** asked for each part of the challenge brief to be covered and for one feature that sets the
   tool apart, decided which numbers to keep when two downloads disagreed, and published the site on GitHub Pages.
 
@@ -313,16 +315,15 @@ Claude Code). This section says what our team did and what the AI did.
 - **Drafted the crop content** in `data/crops.json`: crop traits, the rotation options, and their benefits, risks and
   data gaps. It then checked those numbers against published sources (linked in the file and on the page) and corrected
   several. These are **not** NASA data. Items without a local source are marked "Partly".
+- **Built the scoring method the team proposed** (see "How the scores work"), and set the first values for the
+  heat-sensitivity, market and ease ratings. These are judgment values, labelled "our rating".
 - **Proposed and built the 35-year stress test**, the map, and the glossary and explainer text. The stress test's
   assumptions are listed on the page and above.
 
 ### What the AI did not do
 
-- It did not create or change any NASA or USDA data. Every climate, satellite and soil number on the page is read from
+It did not create or change any NASA or USDA data. Every climate, satellite and soil number on the page is read from
 the files in `data/`, which the scripts produce from NASA and USDA downloads.
-
-- **Propose the scoring method** (see "How the scores work"), including the heat-sensitivity, market and ease
-  ratings. These are judgment values, labelled "our rating".
 
 ### Human review
 
