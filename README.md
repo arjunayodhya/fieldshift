@@ -318,7 +318,7 @@ Claude Code). This section says what our team did and what the AI did.
 
 ### What the AI did not do
 
-- **It did not create or change any NASA or USDA data. Every climate, satellite and soil number on the page is read from
+- It did not create or change any NASA or USDA data. Every climate, satellite and soil number on the page is read from
 the files in `data/`, which the scripts produce from NASA and USDA downloads.
 
 - **Propose the scoring method** (see "How the scores work"), including the heat-sensitivity, market and ease
