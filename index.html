@@ -1,0 +1,148 @@
+<!doctype html>
+<!--
+  Field Shift: farm climate dashboard (NASA Space Apps 2026)
+  AI-use note: this page's HTML/CSS/JS were drafted with help from an AI coding
+  assistant (Claude by Anthropic) and reviewed/edited by our team. Climate numbers
+  come from NASA POWER data in data/power_summary.json. Crop numbers in
+  data/crops.json were drafted with AI help and are flagged until our team checks them.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Shift: Fallon Farm Climate</title>
+  <meta name="description" content="How the climate has changed at an alfalfa farm near Fallon, Nevada, using 35 years of NASA POWER data.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <p class="eyebrow">Field Shift · NASA Space Apps 2026</p>
+      <h1>How has the weather changed on this farm?</h1>
+      <p class="lede" id="site-line">Loading site…</p>
+      <div class="controls" role="group" aria-label="Units">
+        <span class="control-label">Units</span>
+        <div class="seg" id="units">
+          <button type="button" data-units="us" aria-pressed="true">°F · inches</button>
+          <button type="button" data-units="metric" aria-pressed="false">°C · mm</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="load-error" class="notice" hidden></div>
+
+    <!-- 1. Month-by-month chart -->
+    <section aria-labelledby="h-months">
+      <div class="section-head">
+        <h2 id="h-months">Month by month</h2>
+        <div class="controls" role="group" aria-label="Years shown">
+          <span class="control-label">Years</span>
+          <div class="seg" id="period">
+            <button type="button" data-period="recent" aria-pressed="true">Last 10 yrs</button>
+            <button type="button" data-period="past" aria-pressed="false">1991–2015</button>
+            <button type="button" data-period="normals" aria-pressed="false">All 35 yrs</button>
+          </div>
+        </div>
+      </div>
+      <p class="frost-window" id="frost-window"></p>
+
+      <figure class="card chart-card">
+        <figcaption>
+          <h3>Hot days and frost days</h3>
+          <p class="sub" id="days-sub">Average days per month.</p>
+        </figcaption>
+        <div class="chart-box"><canvas id="days-chart" role="img" aria-label="Bar chart of very hot days and frost days per month"></canvas></div>
+      </figure>
+
+      <figure class="card chart-card">
+        <figcaption>
+          <h3>Rain and snow</h3>
+          <p class="sub" id="rain-sub">Average per month.</p>
+        </figcaption>
+        <div class="chart-box short"><canvas id="rain-chart" role="img" aria-label="Bar chart of monthly precipitation"></canvas></div>
+        <p class="note">Summer is almost dry, so <strong>irrigation, not rain, sets crop water use</strong> in Jun–Sep.
+          The satellite bars (GPM IMERG, 2001 on) match the Fallon weather station (~5 in/yr) better than the model line, which reads too wet.</p>
+      </figure>
+
+      <details class="card table-card">
+        <summary>Show the numbers</summary>
+        <div class="table-scroll"><table id="month-table"></table></div>
+      </details>
+    </section>
+
+    <!-- 2. What's changed -->
+    <section aria-labelledby="h-changed">
+      <div class="section-head">
+        <h2 id="h-changed">What's changed</h2>
+        <p class="sub">Last 10 years (2016–2025) compared with 1991–2015.</p>
+      </div>
+      <div class="cards" id="change-cards"></div>
+      <p class="sub legend-sure">
+        <strong>How sure?</strong> is based on how steady the change has been across all 35 years.
+        <em>Clear</em> = steady rise or fall; <em>Some</em> = noisy but there; <em>Weak</em> = mostly year-to-year swings.
+      </p>
+    </section>
+
+    <!-- 3. Compare rotations -->
+    <section aria-labelledby="h-compare">
+      <div class="section-head">
+        <div>
+          <h2 id="h-compare">Compare crop rotations</h2>
+          <p class="sub">Your current alfalfa plan next to three options that respond to the hotter Jul–Aug.</p>
+        </div>
+      </div>
+      <p class="notice soft"><strong>Read this first:</strong> climate numbers come from NASA data.
+        Crop numbers (water use, salt tolerance and so on) come from extension and agency sources, linked in the crop table below.
+        Where it says <span class="unverified">Partly</span>, we could not find a local number. Talk to your local extension office before changing crops.</p>
+
+      <div class="card table-card">
+        <h3>All options at a glance</h3>
+        <div class="cal-legend" aria-hidden="true">
+          <span><i class="cal-cell irr"></i> growing + irrigated</span>
+          <span><i class="cal-cell dry"></i> growing or dormant, no irrigation</span>
+          <span><i class="cal-cell empty"></i> empty field</span>
+          <span><i class="cal-cell empty peak"></i> Jul–Aug peak heat</span>
+        </div>
+        <div class="table-scroll"><table id="rotation-table" class="grid-table"></table></div>
+      </div>
+
+      <div class="section-head compare-head">
+        <h3>Look closer: compare with</h3>
+        <div class="seg seg-wrap" id="compare-with" role="group" aria-label="Option to compare"></div>
+      </div>
+      <div class="compare-detail" id="compare-detail"></div>
+    </section>
+
+    <!-- 4. Crop traits -->
+    <section aria-labelledby="h-crops">
+      <details class="card table-card">
+        <summary><h2 id="h-crops" class="inline-h">Crop traits</h2> <span class="sub">The numbers behind the options</span></summary>
+        <div class="table-scroll"><table id="crop-table" class="grid-table"></table></div>
+        <p class="sub">Sources (checked <span id="check-date"></span>):</p>
+        <ul class="sources" id="source-list"></ul>
+      </details>
+    </section>
+
+    <!-- 5. Data limits -->
+    <section aria-labelledby="h-limits">
+      <div class="card limits">
+        <h2 id="h-limits">Know the limits of this data</h2>
+        <ul id="limits-list"></ul>
+        <p class="sub" id="source-line"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>Data: NASA POWER (power.larc.nasa.gov) and GPM IMERG. Built for NASA Space Apps 2026, “Field Shift: Adapting Farms with NASA Data.”
+      This site was built with help from an AI coding assistant; see the README for our AI-use note.</p>
+  </footer>
+
+  <!-- Chart.js 4.4.1 (pinned) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+  <script src="compare.js"></script>
+</body>
+</html>

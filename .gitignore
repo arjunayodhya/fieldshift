@@ -1,0 +1,15 @@
+# secrets: never commit tokens
+.env
+*.env
+.netrc
+
+# raw downloads (large; regenerate with scripts/get_data.py)
+data/raw/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# local Claude Code preview config
+.claude/

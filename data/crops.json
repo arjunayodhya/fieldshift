@@ -1,0 +1,351 @@
+{
+  "_about": "Crop traits and rotation options for the Fallon, NV site. Climate evidence is computed live by compare.js from power_summary.json (NASA data). The agronomy numbers below are NOT NASA data. They were drafted with AI help and then checked against the sources listed (source check done 2026-11-14, AI-assisted). 'verified' is true when every number for the crop was found in a source, or 'partly' when something has no local source (see check_note). The team should still spot-check before submission.",
+  "_ai_use": "Drafted and source-checked with help from an AI coding assistant (Claude by Anthropic). Sources marked read='full' were read directly; read='summary' means only a search summary of the page was read.",
+  "source_check_date": "2026-11-14",
+  "sources": {
+    "nv_et": {
+      "name": "Huntington & Allen (2010), Evapotranspiration and Net Irrigation Water Requirements for Nevada, NV Division of Water Resources. Appendices 11, 12, 15, 16 (Fallon Exp. Stn, Carson Desert basin 101)",
+      "url": "https://water.nv.gov/mapping/et/Docs/Appendix_Final.pdf",
+      "read": "full"
+    },
+    "fao_salt": {
+      "name": "FAO crop salt tolerance data, Table A1.1 (after Maas & Hoffman 1977)",
+      "url": "https://www.fao.org/4/Y4263E/y4263e0e.htm",
+      "read": "full"
+    },
+    "unr_teff04": {
+      "name": "Davison, J. (2004), Tef Demonstration Planting Results for 2004, University of Nevada, Reno Extension FS-05-28 (Fallon trial)",
+      "url": "https://extension.unr.edu/small-business-education/pub.aspx?PubID=2363",
+      "read": "full"
+    },
+    "unr_teff06": {
+      "name": "Davison, J. (2006), Observations of Commercial Tef Production in Nevada During 2006, University of Nevada, Reno Extension FS-07-29",
+      "url": "https://extension.unr.edu/publication.aspx?PubID=2327",
+      "read": "full"
+    },
+    "uc_deficit": {
+      "name": "Orloff, Putnam, Hanson & Carlson (2005), Implications of Deficit Irrigation Management of Alfalfa, California Alfalfa & Forage Symposium",
+      "url": "https://alfalfasymposium.ucdavis.edu/+symposium/proceedings/2005/05-25.pdf",
+      "read": "full"
+    },
+    "putnam18": {
+      "name": "Putnam et al. (2018), NAAIC abstract on alfalfa deficit irrigation (stand decline under desert conditions)",
+      "url": "https://naaic.org/Meetings/National/2018meeting/18%20Putnam%20Abstract.pdf",
+      "read": "summary"
+    },
+    "usu_ssg": {
+      "name": "Utah State University Extension, Sorghum-Sudangrass Production Guide",
+      "url": "https://extension.usu.edu/crops/research/sorghum-sudangrass-production-guide",
+      "read": "summary"
+    },
+    "ext_ssg": {
+      "name": "University of Maine Extension Bulletin 2271 (sorghum, sudangrass and hybrids: horses, prussic acid, frost)",
+      "url": "https://extension.umaine.edu/publications/resource/bulletin-2271-maine-forage-facts-sorghum-sudangrass-and-sorghum-sudangrass",
+      "read": "summary"
+    },
+    "gdd": {
+      "name": "Penn State Extension, Understanding Growing Degree Days (base temperatures)",
+      "url": "https://extension.psu.edu/understanding-growing-degree-days",
+      "read": "summary"
+    },
+    "unl_water": {
+      "name": "University of Nebraska Extension G2012 and CropWatch seasonal crop water requirements (water per ton of forage; sorghum-sudangrass 16–33 in)",
+      "url": "https://extensionpubs.unl.edu/publication/g2012/na/html/view",
+      "read": "summary"
+    }
+  },
+  "crops": [
+    {
+      "id": "alfalfa",
+      "name": "Alfalfa",
+      "short": "ALF",
+      "type": "Perennial legume (C3), stand lasts several years",
+      "months": "Grows spring to fall; dormant in winter",
+      "base_temp_c": 5,
+      "heat": "Medium: spring and early-summer cuttings yield more and are better quality than late-summer ones",
+      "heat_short": "Medium",
+      "frost": "High: winter-dormant, survives frost",
+      "water_in": [
+        38,
+        48
+      ],
+      "water_basis": "Fallon: crop needs 3.2 ft of irrigation a year (NV report); 3.5–4.0 acre-ft is normally applied (UNR)",
+      "salt": "Moderately sensitive (yield drops above 2.0 dS/m)",
+      "use": "Dairy, beef and horse hay",
+      "sources": [
+        "nv_et",
+        "unr_teff04",
+        "fao_salt",
+        "uc_deficit",
+        "gdd"
+      ],
+      "verified": true,
+      "check_note": "Water, salt and base temperature found in sources. Corrected from 42–54 in."
+    },
+    {
+      "id": "triticale",
+      "name": "Winter triticale",
+      "short": "TRI",
+      "type": "Winter annual cereal (C3)",
+      "months": "Plant in fall, cut as forage in late spring (our assumption: Oct to late May)",
+      "base_temp_c": 0,
+      "heat": "Low, but it's harvested before summer heat",
+      "heat_short": "Avoids it (cut in May)",
+      "frost": "High: winter-hardy",
+      "water_in": [
+        null,
+        25
+      ],
+      "water_basis": "No local number for triticale forage. Upper limit used: winter wheat grown to grain needs 2.1 ft at Fallon (NV report). A forage cut in May should need less",
+      "salt": "Tolerant (grain yield drops above 6.1 dS/m)",
+      "use": "Dairy and beef silage or hay",
+      "sources": [
+        "nv_et",
+        "fao_salt",
+        "gdd"
+      ],
+      "verified": "partly",
+      "check_note": "Salt and base temperature (as wheat) confirmed. Water use is only an upper limit from winter wheat; harvest timing at Fallon is our assumption. Earlier 14–20 in estimate had no source and was removed."
+    },
+    {
+      "id": "teff",
+      "name": "Teff",
+      "short": "TEF",
+      "type": "Warm-season annual grass (C4)",
+      "months": "Seed right after last frost (mid-May to mid-Jun), 2 forage cuttings about 52 days apart",
+      "base_temp_c": null,
+      "heat": "High: warm-season grass",
+      "heat_short": "High",
+      "frost": "Low: seed only after the last spring frost",
+      "water_in": [
+        32,
+        44
+      ],
+      "water_basis": "Nevada fields: 2.7–3.7 acre-ft applied, average 3.2 (UNR 2006); Fallon trial: 2.9 acre-ft (UNR 2004)",
+      "salt": "Not in the FAO salt tables (data gap)",
+      "use": "Horse hay (about 4–5 tons/acre in Nevada, 2006)",
+      "sources": [
+        "unr_teff04",
+        "unr_teff06",
+        "fao_salt"
+      ],
+      "verified": "partly",
+      "check_note": "Water, timing, cuttings and market confirmed from Nevada trials. Corrected from 18–26 in: teff uses about 80% of alfalfa's water, not half. No base temperature or salt tolerance found."
+    },
+    {
+      "id": "sudan",
+      "name": "Sorghum-sudangrass",
+      "short": "SSG",
+      "type": "Warm-season annual grass (C4)",
+      "months": "Plant late spring in warm soil, 2 or more cuttings in summer",
+      "base_temp_c": 10,
+      "heat": "High: uses water most efficiently in the hot months",
+      "heat_short": "High",
+      "frost": "Low: frost raises prussic-acid risk; wait 7–10 days after a killing frost",
+      "water_in": [
+        16,
+        33
+      ],
+      "water_basis": "16–33 in from Utah and Nebraska extension; the high end is for hot, dry climates like Fallon. For comparison, corn needs 2.6 ft (31 in) at Fallon (NV report)",
+      "salt": "Moderately tolerant (sudangrass yield drops above 2.8 dS/m; grain sorghum above 6.8)",
+      "use": "Beef cattle hay, silage or grazing (not for horses)",
+      "sources": [
+        "usu_ssg",
+        "unl_water",
+        "ext_ssg",
+        "fao_salt",
+        "unr_teff04",
+        "gdd"
+      ],
+      "verified": "partly",
+      "check_note": "Horse and prussic-acid warnings and salt values confirmed. Salt corrected (6.8 is grain sorghum, sudangrass is 2.8). Water range is from other states, no Fallon figure. Base temperature varies by source (46–55°F)."
+    }
+  ],
+  "rotations": [
+    {
+      "id": "current",
+      "name": "Current: Alfalfa, full water",
+      "is_current": true,
+      "calendar": {
+        "alfalfa": {
+          "irrigated": [
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "dry": [
+            1,
+            2,
+            3,
+            11,
+            12
+          ]
+        }
+      },
+      "water_in": [
+        38,
+        48
+      ],
+      "switch_effort": "None",
+      "why": "This is what the farm does now. It's the baseline the others are compared against.",
+      "benefits": [
+        "Known crop, known buyers, equipment already on the farm.",
+        "Perennial: no replanting for several years. Legume: adds nitrogen to the soil."
+      ],
+      "risks": [
+        "Needs the most water of the single-crop options, and needs it through Jul–Aug, when {peak_heat} of the year's {year_heat} very hot days hit.",
+        "Hot days went from {heat_was} to {year_heat} per year. Late-summer cuttings already yield less and are lower quality than spring ones (UC).",
+        "Sensitive to salt: yield drops above 2.0 dS/m (FAO)."
+      ],
+      "data_gaps": [
+        "Actual field water use (we don't have field-level ET or meter data).",
+        "Yield history for this field, to see if summer cuttings are already dropping.",
+        "Irrigation months (Apr–Oct) are our assumption."
+      ]
+    },
+    {
+      "id": "deficit",
+      "name": "Alfalfa, skip water in Jul–Aug",
+      "calendar": {
+        "alfalfa": {
+          "irrigated": [
+            4,
+            5,
+            6,
+            9,
+            10
+          ],
+          "dry": [
+            1,
+            2,
+            3,
+            7,
+            8,
+            11,
+            12
+          ]
+        }
+      },
+      "water_in": [
+        24,
+        42
+      ],
+      "water_note": "6–18 in saved in UC trials",
+      "switch_effort": "Low: same crop, change when you irrigate",
+      "why": "{peak_pct} of very hot days now fall in Jul–Aug. Spring and early-summer cuttings yield more and are better quality than late-summer ones, so stopping water after the second cutting gives up the least valuable hay.",
+      "benefits": [
+        "In UC trials, stopping irrigation after the second cutting (about mid-July) saved 6–18 in of water.",
+        "Those trials found no effect on the stand or on yield the following year.",
+        "No new crop or equipment, and it can be done only in short water years."
+      ],
+      "risks": [
+        "Lost hay: 0.3–1.4 tons/acre in the UC trials (average 0.75).",
+        "Losses were bigger on sandy and loam soils. UC researchers have seen stands thin on commercial desert fields.",
+        "The trials were in cooler northern California and Oregon, not the Nevada desert."
+      ],
+      "data_gaps": [
+        "No deficit-irrigation trial for Fallon. Results depend on soil, water table and stand age.",
+        "Soil type and salt levels for this field.",
+        "Whether water can be turned back on in September is our assumption."
+      ]
+    },
+    {
+      "id": "tri_teff",
+      "name": "Winter triticale; add teff only in good water years",
+      "calendar": {
+        "triticale": {
+          "irrigated": [
+            3,
+            4,
+            5,
+            10
+          ],
+          "dry": [
+            11,
+            12,
+            1,
+            2
+          ]
+        },
+        "teff": {
+          "irrigated": [
+            6,
+            7,
+            8,
+            9
+          ],
+          "dry": []
+        }
+      },
+      "optional": [
+        "teff"
+      ],
+      "water_in": [
+        null,
+        25
+      ],
+      "water_optional_max_in": 69,
+      "water_note": "Triticale only. With teff: up to 69 in, as much as or more than alfalfa",
+      "switch_effort": "Medium: take out alfalfa, plant annual crops",
+      "why": "Triticale grows through the cool months, when {winter_rain} of rain and snow falls, versus only {summer_rain} in Jun–Sep, and it's off the field before Jul–Aug. Each spring you decide whether there is enough water to add teff. This option is about flexibility in drought years, not about saving water every year.",
+      "benefits": [
+        "In a short water year, grow triticale only: no irrigation in Jul–Aug and at most about 25 in of water.",
+        "Triticale tolerates salt far better than alfalfa (6.1 vs 2.0 dS/m, FAO).",
+        "Teff is proven in Fallon: Nevada fields made 4–5 tons/acre in two cuttings, sold mostly as horse hay (UNR)."
+      ],
+      "risks": [
+        "With teff, total water is as much as or more than alfalfa. Teff alone took 2.7–3.7 acre-ft in Nevada fields (UNR).",
+        "Two plantings a year means more work, seed cost and timing risk. Teff competes poorly with weeds in its first 2–3 weeks (UNR).",
+        "Teff must be seeded after the last frost (~{frost_last}), so a late frost delays it."
+      ],
+      "data_gaps": [
+        "Water use of triticale cut for forage at Fallon. We only have an upper limit from winter wheat.",
+        "Current teff prices and buyers (the UNR figures are from 2006).",
+        "Whether irrigation water is delivered in Mar and Oct for this field."
+      ]
+    },
+    {
+      "id": "sudan",
+      "name": "Sorghum-sudangrass, summer only",
+      "calendar": {
+        "sudan": {
+          "irrigated": [
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "dry": []
+        }
+      },
+      "water_in": [
+        16,
+        33
+      ],
+      "water_note": "Expect the high end in Fallon's heat",
+      "switch_effort": "Medium: take out alfalfa, new annual crop",
+      "why": "Very hot days rose from {heat_was} to {year_heat} per year. Sorghum-sudangrass is a warm-season grass that uses water most efficiently in the hot months, when alfalfa is at its weakest.",
+      "benefits": [
+        "Built for Jul–Aug heat.",
+        "Needs less water per ton of forage than alfalfa (about 3 in per ton vs 7, Nebraska Extension).",
+        "It has been grown in Fallon: a UNR trial there cut it twice in one summer.",
+        "A one-season crop, so it's easy to switch back."
+      ],
+      "risks": [
+        "Water saving may be small here: in hot, dry climates it can need up to 33 in, close to alfalfa's 38 in.",
+        "Not for horses (causes cystitis). Prussic acid can poison cattle; wait 7–10 days after a killing frost before cutting or grazing.",
+        "Field sits bare from fall to spring unless you add a winter crop."
+      ],
+      "data_gaps": [
+        "No Fallon water-use figure for this crop.",
+        "Local market and price for sorghum-sudangrass hay.",
+        "No legume, so it needs nitrogen fertilizer. Cost not included."
+      ]
+    }
+  ]
+}
