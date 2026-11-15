@@ -68,6 +68,16 @@ Key findings for this site:
 - The POWER model rain (`PRECTOTCORR`) reads too wet (~8 in/yr). GPM IMERG satellite rain (~5–6 in/yr)
   matches the Fallon station (~5 in/yr) better.
 
+### What the MODIS and SMAP download showed (2026-11-15)
+
+- **NDVI (MODIS MOD13Q1, 2015–2026):** the 250 m pixel at the site point never reads above 0.32, so it is mostly not cropland.
+  It cannot show how alfalfa responds to Jul–Aug heat. At this pixel, greenness is level from May to September (about 0.25)
+  and there is no link between hot years and summer greenness (r = −0.09, 11 years). The page says this plainly.
+- **Soil moisture (SMAP SPL3SMP_E, 2015–2026):** topsoil is driest in Jun–Sep (0.11) and wettest in winter (0.14).
+  SMAP marks every reading used here as below its recommended quality, and 2,425 of 4,148 days had no usable reading.
+- **To get real crop evidence:** set LAT/LON in scripts/get_data.py to the middle of an actual field, delete
+  data/raw/appeears_task_fallon_nv.txt, and run the download and the summary again.
+
 ## Data
 
 | File | Made by | What it is |

@@ -225,20 +225,33 @@ function drawField() {
   ndviFig.hidden = !f.ndvi;
   if (f.ndvi) {
     const n = f.ndvi;
-    document.getElementById("ndvi-sub").textContent =
-      `Average NDVI by month, ${n.years[0]}–${n.years[1]}. 0 = bare ground, 0.8 = dense green crop. One 250 m satellite pixel.`;
+    document.getElementById("ndvi-sub").innerHTML =
+      `Average NDVI by month, ${n.years[0]}–${n.years[1]}. 0 = bare ground, 0.8 = dense green crop. One 250 m satellite pixel.` +
+      (n.pixel_is_sparse ? ` <strong>Caution: this pixel is mostly not cropland.</strong>` : "");
     state.fieldCharts.ndvi = single("ndvi-chart", "line", "Greenness (NDVI)", n.monthly.map((m) => m.value), t.rainSat, "NDVI", 2, 1);
-    if (n.june_avg != null && n.jul_aug_avg != null) {
-      const diff = n.jul_aug_avg - n.june_avg;
-      const pct = Math.abs(Math.round((diff / n.june_avg) * 100));
-      findings.push(Math.abs(diff) < 0.02
-        ? `Greenness in Jul–Aug (<strong>${n.jul_aug_avg.toFixed(2)}</strong>) is about the same as in June (${n.june_avg.toFixed(2)}). Greenest month: ${n.peak_month}.`
-        : `Greenness in Jul–Aug (<strong>${n.jul_aug_avg.toFixed(2)}</strong>) is <strong>${pct}% ${diff < 0 ? "lower" : "higher"}</strong> than in June (${n.june_avg.toFixed(2)}). Greenest month: ${n.peak_month}.`);
-    }
-    const h = n.heat_vs_summer_greenness;
-    if (h && h.r != null) {
-      const strength = Math.abs(h.r) >= 0.5 ? "a clear" : Math.abs(h.r) >= 0.3 ? "some" : "no clear";
-      findings.push(`Across ${h.n_years} years there is <strong>${strength} link</strong> between hotter summers and ${h.r < 0 ? "lower" : "higher"} Jul–Aug greenness (r = ${h.r}). That is too few years to be sure.`);
+    const vals = n.monthly.filter((m) => m.value != null);
+    if (n.pixel_is_sparse) {
+      // The pixel never gets green enough to be a crop field: say so, and do not
+      // present it as evidence about the crop.
+      findings.push(`<strong>This satellite pixel is not a crop field.</strong> Its greenness never goes above ${n.highest_value}, and a dense irrigated crop reads much higher. So it <strong>cannot show how alfalfa handles Jul–Aug heat</strong>.`);
+      if (n.june_avg != null && n.jul_aug_avg != null) {
+        const lo = Math.min(...vals.map((m) => m.value)), hi = Math.max(...vals.map((m) => m.value));
+        findings.push(`What it does show: the wider area is least green in winter (${lo.toFixed(2)}) and greenest in ${n.peak_month} (${hi.toFixed(2)}). Jul–Aug (${n.jul_aug_avg.toFixed(2)}) is about level with June (${n.june_avg.toFixed(2)}).`);
+      }
+      findings.push("To get real crop evidence, download NDVI again for a point in the middle of an actual field.");
+    } else {
+      if (n.june_avg != null && n.jul_aug_avg != null) {
+        const diff = n.jul_aug_avg - n.june_avg;
+        const pct = Math.abs(Math.round((diff / n.june_avg) * 100));
+        findings.push(Math.abs(diff) < 0.02
+          ? `Greenness in Jul–Aug (<strong>${n.jul_aug_avg.toFixed(2)}</strong>) is about the same as in June (${n.june_avg.toFixed(2)}). Greenest month: ${n.peak_month}.`
+          : `Greenness in Jul–Aug (<strong>${n.jul_aug_avg.toFixed(2)}</strong>) is <strong>${pct}% ${diff < 0 ? "lower" : "higher"}</strong> than in June (${n.june_avg.toFixed(2)}). Greenest month: ${n.peak_month}.`);
+      }
+      const h = n.heat_vs_summer_greenness;
+      if (h && h.r != null) {
+        const strength = Math.abs(h.r) >= 0.5 ? "a clear" : Math.abs(h.r) >= 0.3 ? "some" : "no clear";
+        findings.push(`Across ${h.n_years} years there is <strong>${strength} link</strong> between hotter summers and ${h.r < 0 ? "lower" : "higher"} Jul–Aug greenness (r = ${h.r}). That is too few years to be sure.`);
+      }
     }
   }
 
@@ -249,7 +262,11 @@ function drawField() {
     document.getElementById("smap-sub").textContent =
       `Average by month, ${s.years[0]}–${s.years[1]}. Share of the top 2 in of soil that is water. About a 6-mile (9 km) area.`;
     state.fieldCharts.smap = single("smap-chart", "bar", "Soil moisture", s.monthly.map((m) => m.value), t.frost, "m³ water per m³ soil", 3);
-    findings.push(`Measured topsoil is driest in <strong>${s.driest_month}</strong> and wettest in <strong>${s.wettest_month}</strong>. This is the wider area, mixing irrigated fields and dry desert.`);
+    const sv = s.monthly.filter((m) => m.value != null).map((m) => m.value);
+    findings.push(`Measured topsoil is driest around <strong>${s.driest_month}</strong> (${Math.min(...sv).toFixed(2)}) and wettest in <strong>${s.wettest_month}</strong> (${Math.max(...sv).toFixed(2)}): dry summers, wetter winters. This is the wider area, mixing irrigated fields and dry desert.`);
+    if (s.recommended_quality_share != null && s.recommended_quality_share < 0.5) {
+      findings.push("SMAP marks its readings here as below its recommended quality, so treat this as a rough pattern only.");
+    }
   }
 
   document.getElementById("field-findings").innerHTML = findings.map((x) => `<li>${x}</li>`).join("");

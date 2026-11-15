@@ -1,0 +1,380 @@
+{
+  "source": "NASA AppEEARS point sample (appeears.earthdatacloud.nasa.gov)",
+  "data_notes": [
+    "The NDVI pixel at the site point never reads above 0.32. A dense irrigated crop reads much higher, so this pixel is mostly not cropland (bare ground, desert shrubs, buildings, or a mix). It cannot show how alfalfa responds to heat. To fix this, set LAT/LON in scripts/get_data.py to the middle of a real field and download again.",
+    "NDVI is from one 250 m MODIS pixel at the site point. It may cover parts of several fields, roads or bare ground, so it shows the area's pattern, not one field's yield.",
+    "Alfalfa is cut several times a summer, and each cutting drops NDVI for a couple of weeks. A summer dip can be cuttings, heat stress, or both.",
+    "SMAP marks 1723 of the 1723 readings used here as below its recommended quality, and 2425 days had no usable reading. Treat the soil moisture pattern as rough.",
+    "SMAP sees only the top ~5 cm of soil over a ~9 km area. It does not show root-zone water or any single field."
+  ],
+  "site": {
+    "id": "fallon_nv",
+    "name": "Fallon, Nevada",
+    "lat": 39.47,
+    "lon": -118.78,
+    "grid_elevation_m": 1269.1
+  },
+  "ndvi": {
+    "product": "MOD13Q1_061",
+    "what": "NDVI crop greenness, 0 = bare soil, about 0.8+ = dense green crop. One 250 m pixel at the site point, every 16 days.",
+    "years": [
+      2015,
+      2026
+    ],
+    "observations_used": 264,
+    "observations_dropped": 9,
+    "quality_counts": {
+      "0b00": 178,
+      "0b01": 86,
+      "0b10": 9
+    },
+    "highest_value": 0.32,
+    "pixel_is_sparse": true,
+    "monthly": [
+      {
+        "month": 1,
+        "name": "Jan",
+        "value": 0.142,
+        "n": 21
+      },
+      {
+        "month": 2,
+        "name": "Feb",
+        "value": 0.155,
+        "n": 24
+      },
+      {
+        "month": 3,
+        "name": "Mar",
+        "value": 0.169,
+        "n": 24
+      },
+      {
+        "month": 4,
+        "name": "Apr",
+        "value": 0.203,
+        "n": 24
+      },
+      {
+        "month": 5,
+        "name": "May",
+        "value": 0.256,
+        "n": 24
+      },
+      {
+        "month": 6,
+        "name": "Jun",
+        "value": 0.257,
+        "n": 24
+      },
+      {
+        "month": 7,
+        "name": "Jul",
+        "value": 0.25,
+        "n": 24
+      },
+      {
+        "month": 8,
+        "name": "Aug",
+        "value": 0.255,
+        "n": 24
+      },
+      {
+        "month": 9,
+        "name": "Sep",
+        "value": 0.248,
+        "n": 24
+      },
+      {
+        "month": 10,
+        "name": "Oct",
+        "value": 0.221,
+        "n": 14
+      },
+      {
+        "month": 11,
+        "name": "Nov",
+        "value": 0.196,
+        "n": 17
+      },
+      {
+        "month": 12,
+        "name": "Dec",
+        "value": 0.164,
+        "n": 20
+      }
+    ],
+    "yearly": [
+      {
+        "year": 2015,
+        "n": 23,
+        "peak_summer": 0.261,
+        "june": 0.289,
+        "growing_season": 0.256
+      },
+      {
+        "year": 2016,
+        "n": 22,
+        "peak_summer": 0.26,
+        "june": 0.251,
+        "growing_season": 0.246
+      },
+      {
+        "year": 2017,
+        "n": 20,
+        "peak_summer": 0.257,
+        "june": 0.288,
+        "growing_season": 0.267
+      },
+      {
+        "year": 2018,
+        "n": 23,
+        "peak_summer": 0.279,
+        "june": 0.271,
+        "growing_season": 0.257
+      },
+      {
+        "year": 2019,
+        "n": 22,
+        "peak_summer": 0.25,
+        "june": 0.261,
+        "growing_season": 0.24
+      },
+      {
+        "year": 2020,
+        "n": 22,
+        "peak_summer": 0.252,
+        "june": 0.245,
+        "growing_season": 0.24
+      },
+      {
+        "year": 2021,
+        "n": 23,
+        "peak_summer": 0.274,
+        "june": 0.266,
+        "growing_season": 0.24
+      },
+      {
+        "year": 2022,
+        "n": 21,
+        "peak_summer": 0.248,
+        "june": 0.246,
+        "growing_season": 0.232
+      },
+      {
+        "year": 2023,
+        "n": 23,
+        "peak_summer": 0.262,
+        "june": 0.239,
+        "growing_season": 0.24
+      },
+      {
+        "year": 2024,
+        "n": 23,
+        "peak_summer": 0.228,
+        "june": 0.252,
+        "growing_season": 0.234
+      },
+      {
+        "year": 2025,
+        "n": 22,
+        "peak_summer": 0.213,
+        "june": 0.201,
+        "growing_season": 0.215
+      },
+      {
+        "year": 2026,
+        "n": 19,
+        "peak_summer": 0.249,
+        "june": 0.276,
+        "growing_season": 0.248
+      }
+    ],
+    "peak_month": "Jun",
+    "june_avg": 0.257,
+    "jul_aug_avg": 0.253,
+    "heat_vs_summer_greenness": {
+      "r": -0.09,
+      "n_years": 11,
+      "note": "Correlation between very hot days in a year (NASA POWER) and Jul-Aug NDVI. Few years, so treat as a hint only."
+    }
+  },
+  "smap": {
+    "product": "SPL3SMP_E",
+    "what": "Soil moisture in the top ~5 cm, as a fraction of soil volume (m3/m3). About 9 km grid, so it mixes irrigated fields and dry desert.",
+    "years": [
+      2015,
+      2026
+    ],
+    "observations_used": 1723,
+    "observations_dropped": 2425,
+    "quality_counts": {
+      "7.0": 2183,
+      "1.0": 1723,
+      "5.0": 242
+    },
+    "recommended_quality_share": 0.0,
+    "monthly": [
+      {
+        "month": 1,
+        "name": "Jan",
+        "value": 0.141,
+        "n": 114
+      },
+      {
+        "month": 2,
+        "name": "Feb",
+        "value": 0.137,
+        "n": 119
+      },
+      {
+        "month": 3,
+        "name": "Mar",
+        "value": 0.131,
+        "n": 142
+      },
+      {
+        "month": 4,
+        "name": "Apr",
+        "value": 0.122,
+        "n": 162
+      },
+      {
+        "month": 5,
+        "name": "May",
+        "value": 0.12,
+        "n": 140
+      },
+      {
+        "month": 6,
+        "name": "Jun",
+        "value": 0.113,
+        "n": 162
+      },
+      {
+        "month": 7,
+        "name": "Jul",
+        "value": 0.113,
+        "n": 163
+      },
+      {
+        "month": 8,
+        "name": "Aug",
+        "value": 0.113,
+        "n": 165
+      },
+      {
+        "month": 9,
+        "name": "Sep",
+        "value": 0.114,
+        "n": 161
+      },
+      {
+        "month": 10,
+        "name": "Oct",
+        "value": 0.124,
+        "n": 148
+      },
+      {
+        "month": 11,
+        "name": "Nov",
+        "value": 0.137,
+        "n": 125
+      },
+      {
+        "month": 12,
+        "name": "Dec",
+        "value": 0.134,
+        "n": 122
+      }
+    ],
+    "yearly": [
+      {
+        "year": 2015,
+        "n": 96,
+        "peak_summer": 0.113,
+        "june": 0.107,
+        "growing_season": 0.105
+      },
+      {
+        "year": 2016,
+        "n": 131,
+        "peak_summer": 0.081,
+        "june": 0.082,
+        "growing_season": 0.09
+      },
+      {
+        "year": 2017,
+        "n": 155,
+        "peak_summer": 0.139,
+        "june": 0.147,
+        "growing_season": 0.143
+      },
+      {
+        "year": 2018,
+        "n": 152,
+        "peak_summer": 0.113,
+        "june": 0.119,
+        "growing_season": 0.12
+      },
+      {
+        "year": 2019,
+        "n": 126,
+        "peak_summer": 0.109,
+        "june": 0.137,
+        "growing_season": 0.119
+      },
+      {
+        "year": 2020,
+        "n": 166,
+        "peak_summer": 0.105,
+        "june": 0.1,
+        "growing_season": 0.106
+      },
+      {
+        "year": 2021,
+        "n": 156,
+        "peak_summer": 0.102,
+        "june": 0.102,
+        "growing_season": 0.105
+      },
+      {
+        "year": 2022,
+        "n": 138,
+        "peak_summer": 0.097,
+        "june": 0.086,
+        "growing_season": 0.093
+      },
+      {
+        "year": 2023,
+        "n": 150,
+        "peak_summer": 0.149,
+        "june": 0.169,
+        "growing_season": 0.159
+      },
+      {
+        "year": 2024,
+        "n": 159,
+        "peak_summer": 0.116,
+        "june": 0.119,
+        "growing_season": 0.127
+      },
+      {
+        "year": 2025,
+        "n": 159,
+        "peak_summer": 0.105,
+        "june": 0.092,
+        "growing_season": 0.107
+      },
+      {
+        "year": 2026,
+        "n": 135,
+        "peak_summer": 0.119,
+        "june": 0.112,
+        "growing_season": 0.116
+      }
+    ],
+    "driest_month": "Jun",
+    "wettest_month": "Jan"
+  }
+}

@@ -23,6 +23,7 @@ OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("data")
 POWER_SUMMARY = Path("data/power_summary.json")
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 MIN_OBS_PER_YEAR = 6      # skip a year's summer value if it has almost no data
+SPARSE_NDVI = 0.5         # if NDVI never reaches this, the pixel is not a dense crop field
 
 
 def find_csv(*needles):
@@ -72,7 +73,11 @@ def read_series(path, value_needles, lo, hi, quality=None):
         col = find_col(header, *value_needles, exclude=("quality", "reliability", "bitmask", "description", "modland", "_qa"))
         if not col:
             sys.exit(f"[summarize] no column like {value_needles} in {path.name}. Columns: {header}")
-        qcol = find_col(header, *quality[0]) if quality else None
+        qcol = None
+        if quality:
+            # exact column-name ending first (avoids matching the *_Description columns)
+            qcol = next((h for h in header if h.lower().endswith(quality[0].lower())), None)
+        qcounts = defaultdict(int)
         for r in reader:
             try:
                 v = float(r[col])
@@ -81,18 +86,18 @@ def read_series(path, value_needles, lo, hi, quality=None):
                 dropped += 1
                 continue
             ok = lo < v < hi
-            if ok and qcol and r.get(qcol, "") != "":
-                try:
-                    ok = float(r[qcol]) in quality[1]
-                except ValueError:
-                    pass
+            if qcol:
+                q = (r.get(qcol) or "").strip()
+                qcounts[q] += 1
+                if ok and q not in quality[1]:
+                    ok = False
             if ok:
                 rows.append((y, m, v))
                 kept += 1
             else:
                 dropped += 1
-    print(f"[summarize] {path.name}: column '{col}', kept {kept}, dropped {dropped}")
-    return rows, col, kept, dropped
+    print(f"[summarize] {path.name}: column '{col}', quality column '{qcol}', kept {kept}, dropped {dropped}")
+    return rows, col, kept, dropped, dict(qcounts)
 
 
 def monthly_and_yearly(rows, summer=(7, 8), season=(4, 5, 6, 7, 8, 9, 10)):
@@ -133,9 +138,14 @@ def main():
     ndvi_csv = find_csv("MOD13Q1")
     if ndvi_csv:
         # AppEEARS applies the scale factor, so NDVI is -0.2..1 (fill value becomes -0.3).
-        # pixel_reliability: 0 = good, 1 = marginal, 2 = snow/ice, 3 = cloudy
-        rows, col, kept, dropped = read_series(
-            ndvi_csv, ("ndvi",), -0.2, 1.0001, quality=(("pixel_reliability",), (0.0, 1.0)))
+        # VI_Quality MODLAND bits: 0b00 = good, 0b01 = usable (check other QA),
+        # 0b10 = probably cloudy, 0b11 = not produced. Keep the first two.
+        rows, col, kept, dropped, qc = read_series(
+            ndvi_csv, ("ndvi",), -0.2, 1.0001, quality=("VI_Quality_MODLAND", {"0b00", "0b01"}))
+        highest = round(max(v for _, _, v in rows), 2) if rows else None
+        # Dense irrigated crops read well above 0.5 at peak. If this pixel never
+        # does, it is mostly not cropland and says little about the crop itself.
+        sparse = highest is not None and highest < SPARSE_NDVI
         monthly, yearly = monthly_and_yearly(rows)
         peak_month = max((m for m in monthly if m["value"] is not None), key=lambda m: m["value"], default=None)
         pairs = [(power_years[y["year"]]["heat_days"], y["peak_summer"]) for y in yearly
@@ -146,6 +156,9 @@ def main():
             "years": [yearly[0]["year"], yearly[-1]["year"]] if yearly else None,
             "observations_used": kept,
             "observations_dropped": dropped,
+            "quality_counts": qc,
+            "highest_value": highest,
+            "pixel_is_sparse": sparse,
             "monthly": monthly,
             "yearly": yearly,
             "peak_month": peak_month["name"] if peak_month else None,
@@ -157,6 +170,9 @@ def main():
                 "note": "Correlation between very hot days in a year (NASA POWER) and Jul-Aug NDVI. Few years, so treat as a hint only.",
             },
         }
+        if sparse:
+            out["data_notes"].append(
+                f"The NDVI pixel at the site point never reads above {highest}. A dense irrigated crop reads much higher, so this pixel is mostly not cropland (bare ground, desert shrubs, buildings, or a mix). It cannot show how alfalfa responds to heat. To fix this, set LAT/LON in scripts/get_data.py to the middle of a real field and download again.")
         out["data_notes"].append(
             "NDVI is from one 250 m MODIS pixel at the site point. It may cover parts of several fields, roads or bare ground, so it shows the area's pattern, not one field's yield.")
         out["data_notes"].append(
@@ -168,7 +184,12 @@ def main():
     smap_csv = find_csv("SPL3SMP")
     if smap_csv:
         # volumetric soil moisture, m3/m3; fill value is -9999
-        rows, col, kept, dropped = read_series(smap_csv, ("soil_moisture",), 0.0, 0.9)
+        # retrieval_qual_flag bits: 1 = below recommended quality, 2 = not attempted,
+        # 4 = not successful. 0.0 = recommended quality. Keep 0 and 1 (a value was
+        # retrieved); drop anything with the "not attempted/not successful" bits.
+        rows, col, kept, dropped, qc = read_series(
+            smap_csv, ("soil_moisture",), 0.0, 0.9, quality=("retrieval_qual_flag", {"0.0", "0", "1.0", "1"}))
+        recommended = qc.get("0.0", 0) + qc.get("0", 0)
         monthly, yearly = monthly_and_yearly(rows, summer=(7, 8), season=(4, 5, 6, 7, 8, 9, 10))
         out["smap"] = {
             "product": "SPL3SMP_E",
@@ -176,11 +197,16 @@ def main():
             "years": [yearly[0]["year"], yearly[-1]["year"]] if yearly else None,
             "observations_used": kept,
             "observations_dropped": dropped,
+            "quality_counts": qc,
+            "recommended_quality_share": round(recommended / kept, 2) if kept else None,
             "monthly": monthly,
             "yearly": yearly,
             "driest_month": min((m for m in monthly if m["value"] is not None), key=lambda m: m["value"], default={}).get("name"),
             "wettest_month": max((m for m in monthly if m["value"] is not None), key=lambda m: m["value"], default={}).get("name"),
         }
+        if kept and recommended / kept < 0.5:
+            out["data_notes"].append(
+                f"SMAP marks {kept - recommended} of the {kept} readings used here as below its recommended quality, and {dropped} days had no usable reading. Treat the soil moisture pattern as rough.")
         out["data_notes"].append(
             "SMAP sees only the top ~5 cm of soil over a ~9 km area. It does not show root-zone water or any single field.")
     else:
