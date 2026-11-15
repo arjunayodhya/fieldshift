@@ -313,15 +313,16 @@ Claude Code). This section says what our team did and what the AI did.
 - **Drafted the crop content** in `data/crops.json`: crop traits, the rotation options, and their benefits, risks and
   data gaps. It then checked those numbers against published sources (linked in the file and on the page) and corrected
   several. These are **not** NASA data. Items without a local source are marked "Partly".
-- **Proposed the scoring method** (see "How the scores work"), including the heat-sensitivity, market and ease
-  ratings. These are judgment values, labelled "our rating".
 - **Proposed and built the 35-year stress test**, the map, and the glossary and explainer text. The stress test's
   assumptions are listed on the page and above.
 
 ### What the AI did not do
 
-It did not create or change any NASA or USDA data. Every climate, satellite and soil number on the page is read from
+- **It did not create or change any NASA or USDA data. Every climate, satellite and soil number on the page is read from
 the files in `data/`, which the scripts produce from NASA and USDA downloads.
+
+- **Propose the scoring method** (see "How the scores work"), including the heat-sensitivity, market and ease
+  ratings. These are judgment values, labelled "our rating".
 
 ### Human review
 
