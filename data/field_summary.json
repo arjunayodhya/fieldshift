@@ -1,9 +1,10 @@
 {
   "source": "NASA AppEEARS point sample (appeears.earthdatacloud.nasa.gov)",
   "data_notes": [
-    "The NDVI pixel at the site point never reads above 0.32. A dense irrigated crop reads much higher, so this pixel is mostly not cropland (bare ground, desert shrubs, buildings, or a mix). It cannot show how alfalfa responds to heat. To fix this, set LAT/LON in scripts/get_data.py to the middle of a real field and download again.",
+    "The NDVI point is a study field picked from the USDA crop map: alfalfa in 2017-2024, with 8 of 8 check points 250 m away also alfalfa. Only those alfalfa years are used. It is an example field, not a specific farmer's field.",
     "NDVI is from one 250 m MODIS pixel. It can include field edges, roads or a neighbouring field, and it shows greenness, not yield.",
     "Alfalfa is cut several times a summer, and each cutting drops NDVI for a couple of weeks. A summer dip can be cuttings, heat stress, or both.",
+    "Hot summers are often also short-water years. Lower greenness in a hot year may come from less irrigation water as much as from the heat itself, and this data cannot separate the two.",
     "SMAP marks 1723 of the 1723 readings used here as below its recommended quality, and 2425 days had no usable reading. Treat the soil moisture pattern as rough.",
     "SMAP sees only the top ~5 cm of soil over a ~9 km area. It does not show root-zone water or any single field."
   ],
@@ -18,191 +19,201 @@
     "product": "MOD13Q1_061",
     "what": "NDVI crop greenness, 0 = bare soil, about 0.8+ = dense green crop. One 250 m pixel at the site point, every 16 days.",
     "years": [
-      2015,
-      2026
+      2017,
+      2024
     ],
     "point": {
-      "lat": 39.47,
-      "lon": -118.78
+      "lat": 39.45,
+      "lon": -118.8
     },
-    "on_study_field": false,
-    "crop": null,
-    "field": null,
-    "observations_used": 264,
-    "observations_dropped": 9,
+    "on_study_field": true,
+    "crop": "Alfalfa",
+    "field": {
+      "lat": 39.45,
+      "lon": -118.8,
+      "source": "USDA NASS Cropland Data Layer (CropScape), nassgeodata.gmu.edu/CropScape",
+      "crop_history": {
+        "2015": "Fallow/Idle Cropland",
+        "2016": "Fallow/Idle Cropland",
+        "2017": "Alfalfa",
+        "2018": "Alfalfa",
+        "2019": "Alfalfa",
+        "2020": "Alfalfa",
+        "2021": "Alfalfa",
+        "2022": "Alfalfa",
+        "2023": "Alfalfa",
+        "2024": "Alfalfa",
+        "2025": "Hemp"
+      },
+      "alfalfa_years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "field_size_check": {
+        "year": 2024,
+        "crop": "Alfalfa",
+        "same_crop_125m": 7,
+        "same_crop_250m": 8,
+        "of": 8
+      },
+      "data_notes": [
+        "The Cropland Data Layer is a satellite-based map with 30 m squares. It is usually right for major crops like alfalfa but can be wrong in any one year.",
+        "This field was picked from the map to study how alfalfa looks from space. It is an example field, not a specific farmer's field."
+      ]
+    },
+    "observations_used": 175,
+    "observations_dropped": 13,
     "quality_counts": {
-      "0b00": 178,
-      "0b01": 86,
-      "0b10": 9
+      "0b00": 249,
+      "0b10": 13,
+      "0b01": 11
     },
-    "highest_value": 0.32,
-    "pixel_is_sparse": true,
+    "highest_value": 0.88,
+    "pixel_is_sparse": false,
     "monthly": [
       {
         "month": 1,
         "name": "Jan",
-        "value": 0.142,
-        "n": 21
+        "value": 0.289,
+        "n": 13
       },
       {
         "month": 2,
         "name": "Feb",
-        "value": 0.155,
-        "n": 24
+        "value": 0.316,
+        "n": 16
       },
       {
         "month": 3,
         "name": "Mar",
-        "value": 0.169,
-        "n": 24
+        "value": 0.443,
+        "n": 16
       },
       {
         "month": 4,
         "name": "Apr",
-        "value": 0.203,
-        "n": 24
+        "value": 0.603,
+        "n": 16
       },
       {
         "month": 5,
         "name": "May",
-        "value": 0.256,
-        "n": 24
+        "value": 0.598,
+        "n": 16
       },
       {
         "month": 6,
         "name": "Jun",
-        "value": 0.257,
-        "n": 24
+        "value": 0.694,
+        "n": 16
       },
       {
         "month": 7,
         "name": "Jul",
-        "value": 0.25,
-        "n": 24
+        "value": 0.691,
+        "n": 16
       },
       {
         "month": 8,
         "name": "Aug",
-        "value": 0.255,
-        "n": 24
+        "value": 0.656,
+        "n": 16
       },
       {
         "month": 9,
         "name": "Sep",
-        "value": 0.248,
-        "n": 24
+        "value": 0.569,
+        "n": 16
       },
       {
         "month": 10,
         "name": "Oct",
-        "value": 0.221,
-        "n": 14
+        "value": 0.501,
+        "n": 9
       },
       {
         "month": 11,
         "name": "Nov",
-        "value": 0.196,
-        "n": 17
+        "value": 0.458,
+        "n": 14
       },
       {
         "month": 12,
         "name": "Dec",
-        "value": 0.164,
-        "n": 20
+        "value": 0.328,
+        "n": 11
       }
     ],
     "yearly": [
       {
-        "year": 2015,
-        "n": 23,
-        "peak_summer": 0.261,
-        "june": 0.289,
-        "growing_season": 0.256
-      },
-      {
-        "year": 2016,
-        "n": 22,
-        "peak_summer": 0.26,
-        "june": 0.251,
-        "growing_season": 0.246
-      },
-      {
         "year": 2017,
-        "n": 20,
-        "peak_summer": 0.257,
-        "june": 0.288,
-        "growing_season": 0.267
+        "n": 22,
+        "peak_summer": 0.717,
+        "june": 0.605,
+        "growing_season": 0.643
       },
       {
         "year": 2018,
-        "n": 23,
-        "peak_summer": 0.279,
-        "june": 0.271,
-        "growing_season": 0.257
+        "n": 22,
+        "peak_summer": 0.659,
+        "june": 0.753,
+        "growing_season": 0.623
       },
       {
         "year": 2019,
-        "n": 22,
-        "peak_summer": 0.25,
-        "june": 0.261,
-        "growing_season": 0.24
+        "n": 23,
+        "peak_summer": 0.778,
+        "june": 0.695,
+        "growing_season": 0.577
       },
       {
         "year": 2020,
-        "n": 22,
-        "peak_summer": 0.252,
-        "june": 0.245,
-        "growing_season": 0.24
+        "n": 21,
+        "peak_summer": 0.674,
+        "june": 0.746,
+        "growing_season": 0.575
       },
       {
         "year": 2021,
-        "n": 23,
-        "peak_summer": 0.274,
-        "june": 0.266,
-        "growing_season": 0.24
+        "n": 22,
+        "peak_summer": 0.461,
+        "june": 0.53,
+        "growing_season": 0.514
       },
       {
         "year": 2022,
         "n": 21,
-        "peak_summer": 0.248,
-        "june": 0.246,
-        "growing_season": 0.232
+        "peak_summer": 0.691,
+        "june": 0.575,
+        "growing_season": 0.583
       },
       {
         "year": 2023,
         "n": 23,
-        "peak_summer": 0.262,
-        "june": 0.239,
-        "growing_season": 0.24
+        "peak_summer": 0.75,
+        "june": 0.834,
+        "growing_season": 0.753
       },
       {
         "year": 2024,
-        "n": 23,
-        "peak_summer": 0.228,
-        "june": 0.252,
-        "growing_season": 0.234
-      },
-      {
-        "year": 2025,
-        "n": 22,
-        "peak_summer": 0.213,
-        "june": 0.201,
-        "growing_season": 0.215
-      },
-      {
-        "year": 2026,
-        "n": 19,
-        "peak_summer": 0.249,
-        "june": 0.276,
-        "growing_season": 0.248
+        "n": 21,
+        "peak_summer": 0.662,
+        "june": 0.817,
+        "growing_season": 0.716
       }
     ],
     "peak_month": "Jun",
-    "june_avg": 0.257,
-    "jul_aug_avg": 0.253,
+    "june_avg": 0.694,
+    "jul_aug_avg": 0.673,
     "heat_vs_summer_greenness": {
-      "r": -0.09,
-      "n_years": 11,
+      "r": -0.7,
+      "n_years": 8,
       "note": "Correlation between very hot days in a year (NASA POWER) and Jul-Aug NDVI. Few years, so treat as a hint only."
     }
   },

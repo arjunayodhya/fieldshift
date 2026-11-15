@@ -248,14 +248,25 @@ function drawField() {
       if (n.june_avg != null && n.jul_aug_avg != null) {
         const diff = n.jul_aug_avg - n.june_avg;
         const pct = Math.abs(Math.round((diff / n.june_avg) * 100));
-        findings.push(Math.abs(diff) < 0.02
-          ? `Greenness in Jul–Aug (<strong>${n.jul_aug_avg.toFixed(2)}</strong>) is about the same as in June (${n.june_avg.toFixed(2)}). Greenest month: ${n.peak_month}.`
+        // each cutting moves NDVI by 0.3 or more, so small differences between months mean nothing
+        findings.push(Math.abs(diff) < 0.05
+          ? `On average, greenness in Jul–Aug (<strong>${n.jul_aug_avg.toFixed(2)}</strong>) is about the same as in June (${n.june_avg.toFixed(2)}). So there is no steady summer dip in a normal year.`
           : `Greenness in Jul–Aug (<strong>${n.jul_aug_avg.toFixed(2)}</strong>) is <strong>${pct}% ${diff < 0 ? "lower" : "higher"}</strong> than in June (${n.june_avg.toFixed(2)}). Greenest month: ${n.peak_month}.`);
       }
       const h = n.heat_vs_summer_greenness;
+      // coolest vs hottest year in the record, as a concrete example
+      let yearRange = "";
+      const yrs = (n.yearly || []).map((y) => ({ ...y, heat: (state.data.yearly.find((p) => p.year === y.year) || {}).heat_days }))
+        .filter((y) => y.heat != null && y.peak_summer != null).sort((x, y) => x.heat - y.heat);
+      if (yrs.length >= 4) {
+        const c = yrs[0], hot = yrs[yrs.length - 1];
+        yearRange = `Coolest summer (${c.year}, ${c.heat} very hot days): ${c.peak_summer.toFixed(2)}. Hottest (${hot.year}, ${hot.heat} days): ${hot.peak_summer.toFixed(2)}.`;
+      }
       if (h && h.r != null) {
         const strength = Math.abs(h.r) >= 0.5 ? "a clear" : Math.abs(h.r) >= 0.3 ? "some" : "no clear";
-        findings.push(`Across ${h.n_years} years there is <strong>${strength} link</strong> between hotter summers and ${h.r < 0 ? "lower" : "higher"} Jul–Aug greenness (r = ${h.r}). That is too few years to be sure.`);
+        findings.push(`But across the ${h.n_years} alfalfa years there is <strong>${strength} link</strong> between hotter summers and ${h.r < 0 ? "lower" : "higher"} Jul–Aug greenness (r = ${h.r}). ` +
+          (yearRange ? `${yearRange} ` : "") +
+          `That is only ${h.n_years} years at one field, and hot years are often short-water years too, so treat it as a sign worth checking, not proof.`);
       }
     }
   }

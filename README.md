@@ -71,18 +71,24 @@ Key findings for this site:
 - Very hot days rose from about **36 to 54 per year**. Average temperature is up **0.84 °C (1.5 °F)**.
 - **Jul–Aug** is the peak stress window.
 - Summer rain is close to zero, so **irrigation drives crop water use**.
+- At a nearby alfalfa field, satellite greenness in Jul–Aug was **lower in hotter summers** (r = −0.70 over 8 years; small sample).
 - The POWER model rain (`PRECTOTCORR`) reads too wet (~8 in/yr). GPM IMERG satellite rain (~5–6 in/yr)
   matches the Fallon station (~5 in/yr) better.
 
-### What the MODIS and SMAP download showed (2026-11-15)
+### What the MODIS and SMAP downloads showed (2026-11-15)
 
-- **NDVI (MODIS MOD13Q1, 2015–2026):** the 250 m pixel at the site point never reads above 0.32, so it is mostly not cropland.
-  It cannot show how alfalfa responds to Jul–Aug heat. At this pixel, greenness is level from May to September (about 0.25)
-  and there is no link between hot years and summer greenness (r = −0.09, 11 years). The page says this plainly.
+- **NDVI at the study field (MODIS MOD13Q1, alfalfa years 2017–2024, 175 readings):** greenness peaks at 0.88 and
+  shows the saw-tooth of alfalfa cuttings, so this is a real crop signal.
+  - On average, Jul–Aug greenness (0.67) is about the same as June (0.69). There is no steady summer dip.
+  - Across the eight alfalfa years, hotter summers had lower Jul–Aug greenness (r = −0.70). Coolest summer
+    (2023, 31 very hot days): 0.75. Hottest (2021, 70 days): 0.46.
+  - Limits: eight years, one field, greenness is not yield, cutting dates shift the readings, and hot years are
+    often short-water years, so heat and irrigation supply cannot be separated. Treat it as a sign worth checking.
+- **First attempt (town point):** the first download sampled 39.47, −118.78, which the USDA crop map classes as
+  developed land. NDVI there never rose above 0.32. That file is kept in `data/raw/` but no longer used.
 - **Soil moisture (SMAP SPL3SMP_E, 2015–2026):** topsoil is driest in Jun–Sep (0.11) and wettest in winter (0.14).
   SMAP marks every reading used here as below its recommended quality, and 2,425 of 4,148 days had no usable reading.
-- **Fix:** `scripts/get_data.py` now samples NDVI at the study field (see above) instead of the town point.
-  Run it again, then `python scripts/summarize_appeears.py`. The summary uses only the field's alfalfa years.
+  SMAP was sampled at the town point; its grid is about 9 km, so it covers the study field too.
 
 ## Data
 

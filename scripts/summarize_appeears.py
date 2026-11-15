@@ -207,6 +207,8 @@ def main():
             "NDVI is from one 250 m MODIS pixel. It can include field edges, roads or a neighbouring field, and it shows greenness, not yield.")
         out["data_notes"].append(
             "Alfalfa is cut several times a summer, and each cutting drops NDVI for a couple of weeks. A summer dip can be cuttings, heat stress, or both.")
+        out["data_notes"].append(
+            "Hot summers are often also short-water years. Lower greenness in a hot year may come from less irrigation water as much as from the heat itself, and this data cannot separate the two.")
     else:
         print(f"[summarize] no MOD13Q1 csv in {RAW} (is the AppEEARS job finished?)")
 

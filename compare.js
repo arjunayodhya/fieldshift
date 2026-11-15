@@ -401,6 +401,15 @@ function rotationDetail(rot, facts) {
         : `Needs Jul–Aug water in about <strong>${Math.round(m.peakShare * 10)} years in 10</strong>.`,
     `Water use: <strong>${waterFmt(m.water)}</strong> a year on average. From the sources in the crop table, not NASA data.`,
   ];
+  // MODIS greenness at the study field (only if it is a real alfalfa field)
+  const nd = state.field && state.field.ndvi;
+  if (nd && nd.on_study_field && nd.heat_vs_summer_greenness && nd.heat_vs_summer_greenness.r != null && m.crops.some((x) => x.id === "alfalfa") && m.peakShare > 0) {
+    const hv = nd.heat_vs_summer_greenness;
+    const word = Math.abs(hv.r) >= 0.5 ? "was" : Math.abs(hv.r) >= 0.3 ? "tended to be" : null;
+    evidence.push(word && hv.r < 0
+      ? `At the study alfalfa field, Jul–Aug greenness (MODIS) <strong>${word} lower in hotter summers</strong> (r = ${hv.r}, ${hv.n_years} years). Small sample, and hot years are often short-water years too.`
+      : `At the study alfalfa field, MODIS greenness shows no clear link between hotter summers and Jul–Aug greenness (r = ${hv.r}, ${hv.n_years} years).`);
+  }
   const cautions = soilCautions(rot, m);
   return `
     <article class="card detail ${rot.is_current ? "is-current" : ""}">
