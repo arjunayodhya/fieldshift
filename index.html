@@ -72,6 +72,32 @@
       </details>
     </section>
 
+    <!-- 1b. Satellite view of the ground (shown only when data/field_summary.json exists) -->
+    <section aria-labelledby="h-field" id="field-section" hidden>
+      <div class="section-head">
+        <div>
+          <h2 id="h-field">What satellites see on the ground</h2>
+          <p class="sub">NASA MODIS (crop greenness) and SMAP (soil moisture) at this site. Jul–Aug shaded.</p>
+        </div>
+      </div>
+      <div class="two-col">
+        <figure class="card chart-card" id="ndvi-figure">
+          <figcaption><h3>Crop greenness through the year</h3><p class="sub" id="ndvi-sub"></p></figcaption>
+          <div class="chart-box short"><canvas id="ndvi-chart" role="img" aria-label="Line chart of average crop greenness by month"></canvas></div>
+        </figure>
+        <figure class="card chart-card" id="smap-figure">
+          <figcaption><h3>Topsoil moisture through the year</h3><p class="sub" id="smap-sub"></p></figcaption>
+          <div class="chart-box short"><canvas id="smap-chart" role="img" aria-label="Bar chart of average topsoil moisture by month"></canvas></div>
+        </figure>
+      </div>
+      <div class="card">
+        <h3>What it shows</h3>
+        <ul class="plain" id="field-findings"></ul>
+        <p class="sub"><strong>Keep in mind:</strong></p>
+        <ul class="plain small" id="field-notes"></ul>
+      </div>
+    </section>
+
     <!-- 2. What's changed -->
     <section aria-labelledby="h-changed">
       <div class="section-head">
@@ -85,23 +111,53 @@
       </p>
     </section>
 
-    <!-- 3. Compare rotations -->
+    <!-- 3. Your soil -->
+    <section aria-labelledby="h-soil">
+      <div class="section-head">
+        <div>
+          <h2 id="h-soil">Your soil</h2>
+          <p class="sub">What the USDA soil survey maps at this site, and what it means for crop choice.</p>
+        </div>
+      </div>
+      <div class="card soil" id="soil-card"></div>
+    </section>
+
+    <!-- 4. Compare rotations -->
     <section aria-labelledby="h-compare">
       <div class="section-head">
         <div>
-          <h2 id="h-compare">Compare crop rotations</h2>
-          <p class="sub">Your current alfalfa plan next to three options that respond to the hotter Jul–Aug.</p>
+          <h2 id="h-compare">Find a rotation that fits your farm</h2>
+          <p class="sub">Your current alfalfa plan next to four multi-year rotations that respond to the hotter Jul–Aug.</p>
         </div>
       </div>
-      <p class="notice soft"><strong>Read this first:</strong> climate numbers come from NASA data.
+      <p class="notice soft"><strong>Read this first:</strong> climate numbers come from NASA data and soil numbers from the USDA soil survey.
         Crop numbers (water use, salt tolerance and so on) come from extension and agency sources, linked in the crop table below.
-        Where it says <span class="unverified">Partly</span>, we could not find a local number. Talk to your local extension office before changing crops.</p>
+        Where it says <span class="unverified">Partly</span>, we could not find a local number.
+        Scores are a simple guide for comparing options, not a forecast. Talk to your local extension office before changing crops.</p>
+
+      <div class="prio-grid">
+        <div class="card">
+          <h3>What matters most to you?</h3>
+          <p class="sub">Set each one. The ranking updates as you move them.</p>
+          <div id="priority-controls"></div>
+        </div>
+        <div class="card">
+          <h3>Best fit for your priorities</h3>
+          <p class="sub" id="ranking-note"></p>
+          <ol class="ranking" id="ranking"></ol>
+          <details class="how">
+            <summary>How the scores work</summary>
+            <ul id="scoring-notes"></ul>
+          </details>
+        </div>
+      </div>
 
       <div class="card table-card">
         <h3>All options at a glance</h3>
         <div class="cal-legend" aria-hidden="true">
           <span><i class="cal-cell irr"></i> growing + irrigated</span>
           <span><i class="cal-cell dry"></i> growing or dormant, no irrigation</span>
+          <span><i class="cal-cell opt"></i> only in good water years</span>
           <span><i class="cal-cell empty"></i> empty field</span>
           <span><i class="cal-cell empty peak"></i> Jul–Aug peak heat</span>
         </div>
@@ -115,7 +171,7 @@
       <div class="compare-detail" id="compare-detail"></div>
     </section>
 
-    <!-- 4. Crop traits -->
+    <!-- 5. Crop traits -->
     <section aria-labelledby="h-crops">
       <details class="card table-card">
         <summary><h2 id="h-crops" class="inline-h">Crop traits</h2> <span class="sub">The numbers behind the options</span></summary>

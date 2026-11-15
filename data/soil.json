@@ -1,0 +1,73 @@
+{
+  "site": {
+    "id": "fallon_nv",
+    "lat": 39.47,
+    "lon": -118.78
+  },
+  "source": "USDA NRCS Soil Data Access (SSURGO soil survey), sdmdataaccess.sc.egov.usda.gov",
+  "map_unit": "Sagouspe loamy sand, 0 to 1 percent slopes",
+  "map_unit_key": "643843",
+  "soil_name": "Sagouspe",
+  "share_of_map_unit_pct": 85.0,
+  "classification": "Sandy, mixed, mesic Oxyaquic Torrifluvents",
+  "drainage": "Somewhat poorly drained",
+  "texture": "sandy",
+  "topsoil": {
+    "sand_pct": 80.4,
+    "silt_pct": 16.1,
+    "clay_pct": 3.5,
+    "organic_matter_pct": 0.75,
+    "ph": 7.5
+  },
+  "root_zone_cm": 100,
+  "root_zone": {
+    "ec_dsm_max": 1.0,
+    "sar_max": 1.0,
+    "ph_max": 8.5,
+    "awc_cm_per_cm": 0.12,
+    "water_held_in": 4.7
+  },
+  "horizons": [
+    {
+      "top_cm": 0.0,
+      "bottom_cm": 15.0,
+      "sand_pct": 80.4,
+      "silt_pct": 16.1,
+      "clay_pct": 3.5,
+      "organic_matter_pct": 0.75,
+      "ec_dsm": 0.0,
+      "sar": 0.0,
+      "ph": 7.5,
+      "awc_cm_per_cm": 0.11
+    },
+    {
+      "top_cm": 15.0,
+      "bottom_cm": 109.0,
+      "sand_pct": 80.4,
+      "silt_pct": 16.1,
+      "clay_pct": 3.5,
+      "organic_matter_pct": 0.25,
+      "ec_dsm": 1.0,
+      "sar": 1.0,
+      "ph": 8.5,
+      "awc_cm_per_cm": 0.12
+    },
+    {
+      "top_cm": 109.0,
+      "bottom_cm": 147.0,
+      "sand_pct": 66.9,
+      "silt_pct": 23.1,
+      "clay_pct": 10.0,
+      "organic_matter_pct": 0.25,
+      "ec_dsm": 1.0,
+      "sar": 1.0,
+      "ph": 8.5,
+      "awc_cm_per_cm": 0.15
+    }
+  ],
+  "data_notes": [
+    "This is the soil the USDA survey maps at the site point. Soil can change within one field, so a lab test of your own soil is better.",
+    "Survey values are typical ('representative') values for this soil type, not measurements from this farm.",
+    "Salt levels on irrigated desert fields change with irrigation water and drainage. The survey value may be out of date."
+  ]
+}

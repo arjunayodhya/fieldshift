@@ -1,25 +1,65 @@
 # Field Shift: Adapting Farms with NASA Data
 
-NASA Space Apps Challenge 2026 project. A simple decision-support web page that helps a farmer
-see how the climate has changed on their land and, in a later version, compare crop rotations.
+NASA Space Apps Challenge 2026 project. A decision-support web page that helps a farmer see how the climate
+has changed on their land and find a crop rotation that fits their soil, their water and their own priorities.
 
 **Site:** alfalfa farm area near Fallon, Nevada (39.47° N, 118.78° W).
 
-## What the page shows (v1)
+## How it answers the challenge
+
+| The challenge asks for | Where it is in the tool |
+|---|---|
+| NASA Earth observations | NASA POWER (35 years of temperature, frost, heat, soil wetness), GPM IMERG satellite rain, and, once downloaded, MODIS NDVI and SMAP soil moisture |
+| Local soil information | USDA soil survey (SSURGO) for the site point: texture, salt, organic matter, water-holding capacity, drainage |
+| Crop characteristics | Crop traits table with linked sources |
+| Farmer priorities | Five sliders (water, heat, soil health, known buyers, ease of change) that re-rank the rotations |
+| Rotation strategies | Five multi-year rotations, including break-crop years |
+| Strengthen soil health | A soil health score for each rotation, built on the USDA NRCS soil health principles |
+| Adapt to changing conditions | "What's changed" cards and evidence tying each rotation to the Jul–Aug heat |
+
+## What the page shows
 
 1. **Month by month.** Very hot days (≥ 35 °C / 95 °F), frost days, and rain/snow for each month,
    with Jul–Aug (peak heat stress) shaded. You can switch between the last 10 years, 1991–2015, and all 35 years.
-2. **What's changed.** Cards comparing 2016–2025 with 1991–2015, with a "How sure?" rating from the 35-year trend.
-3. **Compare crop rotations.** The current plan (alfalfa, full water) next to three options:
-   - Alfalfa with no irrigation in Jul–Aug (summer deficit irrigation)
-   - Winter triticale, then teff only in years with enough water
-   - Sorghum-sudangrass, summer only
+2. **What satellites see on the ground.** MODIS crop greenness (NDVI) and SMAP topsoil moisture by month.
+   This section appears only when `data/field_summary.json` exists.
+3. **What's changed.** Cards comparing 2016–2025 with 1991–2015, with a "How sure?" rating from the 35-year trend.
+4. **Your soil.** What the USDA soil survey maps at the site, and what it means for crop choice.
+5. **Find a rotation that fits your farm.**
+   - *What matters most to you?* Five sliders. The ranking and the default comparison update as they move, and the
+     settings are remembered in the browser.
+   - *All options at a glance.* Field calendars for each phase of the rotation, average water per year, Jul–Aug water,
+     very hot days while irrigating, soil health score, and effort to switch.
+   - *Look closer.* The current plan next to one option: **why, evidence from NASA data, soil health, notes for
+     your soil, benefits, risks, and data gaps**.
+6. **Crop traits.** Season, base temperature, heat and frost tolerance, water use, salt tolerance, market, and sources.
+7. **Data limits.** Plain-language caveats, taken from `data_notes` in the data file.
 
-   An "at a glance" table shows a 12-month field calendar, water use, whether the option needs water in Jul–Aug,
-   very hot days while irrigating, and rain while irrigating. A side-by-side view covers **why, evidence from NASA data,
-   benefits, risks, and data gaps** for the current plan and the chosen option.
-4. **Crop traits.** Season, base temperature, heat and frost tolerance, water use, salt tolerance, market, and sources to check.
-5. **Data limits.** Plain-language caveats, taken from `data_notes` in the data file.
+The rotations compared:
+
+| Rotation | Idea |
+|---|---|
+| Alfalfa every year, full water | The current plan (baseline) |
+| Alfalfa every year, skip water in Jul–Aug | Stop irrigating in the peak heat months |
+| 4 years alfalfa, then 1 year winter triticale (teff too if water allows) | A cool-season break year that also fixes alfalfa-after-alfalfa problems |
+| 4 years alfalfa, then 1 year sorghum-sudangrass | A heat-loving break crop |
+| No alfalfa: winter triticale every year, teff in good water years | The most flexible in drought years |
+
+### How the scores work
+
+Scores run 0–100 and are a simple index our team defined to compare options. **They are not predictions of yield or profit.**
+The full wording is in `scoring_notes` in `data/crops.json` and under "How the scores work" on the page.
+
+| Score | Based on |
+|---|---|
+| Water | Middle of the rotation's yearly water range (from sources). 0 in = 100, 60 in or more = 0 |
+| Heat | Share of the year's very hot days (NASA POWER) that fall in irrigated months, weighted by each crop's heat sensitivity (our rating) |
+| Soil | Average of: months the ground has a crop on it, how seldom it is replanted, number of different crops, share of years with a legume, and salt fit with the soil survey |
+| Market | Our rating of how established the buyers are |
+| Ease | Our rating of how big the change is |
+
+The fit score is the average of these, weighted by the farmer's sliders. Where teff is grown "only in good water years",
+scores assume one year in two. "Our rating" values are team judgment and are labelled that way on the page.
 
 Key findings for this site:
 - Very hot days rose from about **36 to 54 per year**. Average temperature is up **0.84 °C (1.5 °F)**.
@@ -33,11 +73,14 @@ Key findings for this site:
 | File | Made by | What it is |
 |---|---|---|
 | `data/power_summary.json` | `scripts/get_power.py` | 35 years (1991–2025) of NASA POWER daily data, summarized: monthly normals, frost season, heat days, GDD, recent-vs-past, trends, `data_notes` |
-| `data/crops.json` | hand-written (AI-assisted) | Crop traits + rotation options with linked sources. **Not NASA data** (see source check below) |
-| `data/raw/` | `scripts/get_data.py` | AppEEARS downloads (MODIS NDVI + SMAP soil moisture). Not used by the page yet. |
+| `data/soil.json` | `scripts/get_soil.py` | USDA NRCS soil survey (SSURGO) for the site point: texture, salt (EC), organic matter, pH, water-holding capacity, drainage. No login needed |
+| `data/crops.json` | hand-written (AI-assisted) | Crop traits, multi-year rotations, scoring notes, linked sources. **Not NASA data** (see source check below) |
+| `data/raw/` | `scripts/get_data.py` | AppEEARS downloads (MODIS NDVI + SMAP soil moisture). Not committed |
+| `data/field_summary.json` | `scripts/summarize_appeears.py` | Monthly and yearly NDVI and SMAP summaries from the files in `data/raw/`. Optional: the page hides that section until this file exists |
 
 Sources: [NASA POWER](https://power.larc.nasa.gov) (Agroclimatology community), GPM IMERG via POWER,
-and [AppEEARS](https://appeears.earthdatacloud.nasa.gov) for MODIS and SMAP.
+[AppEEARS](https://appeears.earthdatacloud.nasa.gov) for MODIS and SMAP, and
+[USDA NRCS Soil Data Access](https://sdmdataaccess.sc.egov.usda.gov/) for the soil survey.
 
 ### How the rotation evidence is built
 
@@ -99,7 +142,19 @@ export EARTHDATA_TOKEN="paste_token_here" # macOS / Linux
 python scripts/get_data.py
 ```
 
-Run both scripts from the repo root so output goes to `data/`.
+When the AppEEARS job has finished and the CSVs are in `data/raw/`, build the summary the page loads:
+
+```bash
+python scripts/summarize_appeears.py
+```
+
+The soil lookup needs no login:
+
+```bash
+python scripts/get_soil.py
+```
+
+Run all scripts from the repo root so output goes to `data/`. They need `pip install requests`.
 
 ## Running locally
 
@@ -109,7 +164,7 @@ The page loads its JSON with `fetch`, so opening `index.html` straight from disk
 python -m http.server 8000
 ```
 
-Then open http://localhost:8000.
+Then open http://localhost:8000. With Node instead of Python: `npx http-server -p 8000`.
 
 ## Deploying (GitHub Pages)
 
@@ -121,17 +176,19 @@ Chart.js 4.4.1 loads from cdnjs.
 ```
 index.html      page layout
 styles.css      styles (light + dark mode)
-app.js          loads the JSON, draws charts, cards, and limits
-compare.js      crop trait table + rotation comparison
-data/           power_summary.json (NASA climate) + crops.json (crop traits, rotations)
-scripts/        Python data pipeline (POWER, AppEEARS)
+app.js          loads the JSON, draws climate charts, satellite section, cards, and limits
+compare.js      soil card, priorities, ranking and scores, rotation comparison, crop traits
+data/           power_summary.json (NASA climate), soil.json (USDA soil), crops.json (crops, rotations),
+                field_summary.json (NDVI + SMAP, optional)
+scripts/        Python data pipeline (POWER, AppEEARS, soil survey, AppEEARS summary)
 ```
 
 ## Roadmap
 
 - Spot-check the summary-only sources and fill the open items in the crop source check (see above).
-- Add local data: field water allocation, soil salinity, hay prices.
-- Add MODIS NDVI (crop greenness) and SMAP soil moisture from `get_data.py`.
+- Add local data: field water allocation, a lab soil test, hay prices.
+- Let the farmer pick their own location (rerun the scripts for a new point) and build their own rotation.
+- Have a local agronomist review the heat-sensitivity and market ratings used in the scores.
 
 ## AI-use note
 
@@ -142,6 +199,9 @@ As required by NASA Space Apps, we disclose our AI use:
 - **Crop content:** The AI also drafted `data/crops.json`: crop traits, the rotation options, and their benefits,
   risks, and data gaps. It then checked those numbers against published sources (listed with links in the file and
   on the page) and corrected several. These are **not** NASA data. Items without a local source are marked "Partly".
+- **Scores:** The AI proposed the scoring method (see "How the scores work"), including the heat-sensitivity,
+  market and ease ratings. These are judgment values, labelled "our rating", and need review by the team.
+- **Data scripts:** The AI also wrote `scripts/get_soil.py` and `scripts/summarize_appeears.py`.
 - **What it did not do:** It did not create or change any NASA data. Every climate number on the page is read from
   `data/power_summary.json`, which our Python scripts produce from NASA POWER downloads.
 - **Human review:** Our team reviewed and edited all AI-assisted code and text, checked the numbers shown

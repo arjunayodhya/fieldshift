@@ -14,8 +14,14 @@
 const DATA_URL = "data/power_summary.json";
 
 // ---------- state ----------
-const state = { data: null, crops: null, units: "us", period: "recent", compareWith: null, charts: {} };
+const state = {
+  data: null, crops: null, soil: null, field: null,
+  units: "us", period: "recent", charts: {}, fieldCharts: {},
+  compareWith: null, comparePicked: false, priorities: null,
+};
 const CROPS_URL = "data/crops.json";
+const FIELD_URL = "data/field_summary.json"; // optional: MODIS NDVI + SMAP (scripts/summarize_appeears.py)
+const SOIL_URL = "data/soil.json";          // optional: USDA soil survey (scripts/get_soil.py)
 
 // ---------- unit helpers ----------
 const C_TO_F = (c) => (c * 9) / 5 + 32;
@@ -188,6 +194,68 @@ function drawTable(months) {
      <thead><tr>${head.map((h) => `<th scope="col">${h}</th>`).join("")}</tr></thead><tbody>${rows}</tbody>`;
 }
 
+// ---------- 1b. what the satellites see on the ground (MODIS NDVI + SMAP) ----------
+// Only shown when data/field_summary.json exists (made by scripts/summarize_appeears.py).
+function drawField() {
+  const sec = document.getElementById("field-section");
+  const f = state.field;
+  Object.values(state.fieldCharts).forEach((c) => c.destroy());
+  state.fieldCharts = {};
+  if (!f || (!f.ndvi && !f.smap)) { sec.hidden = true; return; }
+  sec.hidden = false;
+  const t = tokens();
+  const findings = [];
+  const single = (canvasId, type, label, values, color, yTitle, digits, yMax) => {
+    const opts = baseOptions(t, yTitle);
+    opts.plugins.legend.display = false; // one series: the title names it
+    opts.plugins.peakBand.label = "";
+    if (yMax) opts.scales.y.max = yMax;
+    opts.plugins.tooltip.callbacks = { label: (c) => ` ${label}: ${c.parsed.y == null ? "no data" : c.parsed.y.toFixed(digits)}` };
+    const ds = type === "line"
+      ? { label, data: values, borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6,
+          pointBorderColor: t.surface, pointBorderWidth: 2, tension: 0.3, spanGaps: true }
+      : { label, data: values, ...barStyle(color) };
+    return new Chart(document.getElementById(canvasId), {
+      type, data: { labels: f[canvasId === "ndvi-chart" ? "ndvi" : "smap"].monthly.map((m) => m.name), datasets: [ds] },
+      options: opts, plugins: [peakBand],
+    });
+  };
+
+  const ndviFig = document.getElementById("ndvi-figure");
+  ndviFig.hidden = !f.ndvi;
+  if (f.ndvi) {
+    const n = f.ndvi;
+    document.getElementById("ndvi-sub").textContent =
+      `Average NDVI by month, ${n.years[0]}–${n.years[1]}. 0 = bare ground, 0.8 = dense green crop. One 250 m satellite pixel.`;
+    state.fieldCharts.ndvi = single("ndvi-chart", "line", "Greenness (NDVI)", n.monthly.map((m) => m.value), t.rainSat, "NDVI", 2, 1);
+    if (n.june_avg != null && n.jul_aug_avg != null) {
+      const diff = n.jul_aug_avg - n.june_avg;
+      const pct = Math.abs(Math.round((diff / n.june_avg) * 100));
+      findings.push(Math.abs(diff) < 0.02
+        ? `Greenness in Jul–Aug (<strong>${n.jul_aug_avg.toFixed(2)}</strong>) is about the same as in June (${n.june_avg.toFixed(2)}). Greenest month: ${n.peak_month}.`
+        : `Greenness in Jul–Aug (<strong>${n.jul_aug_avg.toFixed(2)}</strong>) is <strong>${pct}% ${diff < 0 ? "lower" : "higher"}</strong> than in June (${n.june_avg.toFixed(2)}). Greenest month: ${n.peak_month}.`);
+    }
+    const h = n.heat_vs_summer_greenness;
+    if (h && h.r != null) {
+      const strength = Math.abs(h.r) >= 0.5 ? "a clear" : Math.abs(h.r) >= 0.3 ? "some" : "no clear";
+      findings.push(`Across ${h.n_years} years there is <strong>${strength} link</strong> between hotter summers and ${h.r < 0 ? "lower" : "higher"} Jul–Aug greenness (r = ${h.r}). That is too few years to be sure.`);
+    }
+  }
+
+  const smapFig = document.getElementById("smap-figure");
+  smapFig.hidden = !f.smap;
+  if (f.smap) {
+    const s = f.smap;
+    document.getElementById("smap-sub").textContent =
+      `Average by month, ${s.years[0]}–${s.years[1]}. Share of the top 2 in of soil that is water. About a 6-mile (9 km) area.`;
+    state.fieldCharts.smap = single("smap-chart", "bar", "Soil moisture", s.monthly.map((m) => m.value), t.frost, "m³ water per m³ soil", 3);
+    findings.push(`Measured topsoil is driest in <strong>${s.driest_month}</strong> and wettest in <strong>${s.wettest_month}</strong>. This is the wider area, mixing irrigated fields and dry desert.`);
+  }
+
+  document.getElementById("field-findings").innerHTML = findings.map((x) => `<li>${x}</li>`).join("");
+  document.getElementById("field-notes").innerHTML = (f.data_notes || []).map((x) => `<li>${x}</li>`).join("");
+}
+
 // ---------- 2. what's changed cards ----------
 // Each card: which recent_vs_past / trends_per_decade key to use, how to format,
 // and a one-line plain-language "why it matters" (written + checked by our team).
@@ -289,6 +357,7 @@ function drawHeader() {
 function render() {
   drawHeader();
   drawCharts();
+  drawField();
   drawCards();
   drawLimits();
   if (typeof drawCompare === "function") drawCompare(); // compare.js
@@ -309,7 +378,7 @@ async function init() {
   wireSeg("units", "units", (u) => { state.units = u; render(); });
   wireSeg("period", "period", (p) => { state.period = p; drawCharts(); });
   // redraw charts when the OS switches light/dark
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => state.data && drawCharts());
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (state.data) { drawCharts(); drawField(); } });
 
   try {
     const getJSON = async (url) => {
@@ -317,7 +386,10 @@ async function init() {
       if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
       return res.json();
     };
-    [state.data, state.crops] = await Promise.all([getJSON(DATA_URL), getJSON(CROPS_URL)]);
+    // optional files: the page still works without them
+    const optional = (url) => getJSON(url).catch(() => null);
+    [state.data, state.crops, state.soil, state.field] = await Promise.all(
+      [getJSON(DATA_URL), getJSON(CROPS_URL), optional(SOIL_URL), optional(FIELD_URL)]);
   } catch (err) {
     const box = document.getElementById("load-error");
     box.hidden = false;
