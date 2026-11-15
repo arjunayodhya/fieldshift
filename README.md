@@ -282,25 +282,48 @@ scripts/        Python data pipeline (POWER, AppEEARS, soil survey, AppEEARS sum
 - Let the farmer pick their own location (rerun the scripts for a new point) and build their own rotation.
 - Have a local agronomist review the heat-sensitivity and market ratings used in the scores.
 
-## AI-use note
+## Who did what, and our AI use
 
-As required by NASA Space Apps, we disclose our AI use:
+As required by NASA Space Apps, we disclose our AI use. We used an AI coding assistant (Claude by Anthropic, via
+Claude Code). This section says what our team did and what the AI did.
 
-- **What:** An AI coding assistant (Claude by Anthropic, via Claude Code) helped draft the web page code
-  (`index.html`, `styles.css`, `app.js`, `compare.js`) and this README.
-- **Crop content:** The AI also drafted `data/crops.json`: crop traits, the rotation options, and their benefits,
-  risks, and data gaps. It then checked those numbers against published sources (listed with links in the file and
-  on the page) and corrected several. These are **not** NASA data. Items without a local source are marked "Partly".
-- **Scores:** The AI proposed the scoring method (see "How the scores work"), including the heat-sensitivity,
-  market and ease ratings. These are judgment values, labelled "our rating", and need review by the team.
-- **Stress test and extras:** The AI proposed and wrote the 35-year stress test, the ET0 calculation
-  (`scripts/get_water_balance.py`), the map, and the glossary and explainer text. The stress test's assumptions are
-  listed on the page and above.
-- **Data scripts:** The AI also wrote `scripts/get_soil.py`, `scripts/get_crop_history.py` and
-  `scripts/summarize_appeears.py`, and chose the study field by scanning the USDA crop map (method in
-  `get_crop_history.py`).
-- **What it did not do:** It did not create or change any NASA data. Every climate number on the page is read from
-  `data/power_summary.json`, which our Python scripts produce from NASA POWER downloads.
-- **Human review:** Our team reviewed and edited all AI-assisted code and text, checked the numbers shown
-  against the JSON, and wrote or approved the plain-language "why it matters" explanations.
-- Each AI-assisted source file includes a comment saying so.
+### What our team did
+
+- **Chose the problem and the site:** the Field Shift challenge, an alfalfa farm area near Fallon, Nevada.
+- **Found the NASA data:** NASA POWER, GPM IMERG satellite rain, and MODIS NDVI and SMAP soil moisture through NASA AppEEARS.
+- **Downloaded the NASA data:** ran the NASA POWER download that produced `data/power_summary.json`, and ran both
+  AppEEARS requests (MODIS and SMAP) with our own NASA Earthdata account.
+- **Found the first key results:** very hot days rising from about 36 to 54 a year, the 0.84 °C warming, Jul–Aug as the
+  peak stress window, and that the POWER model rain reads too wet while GPM IMERG matches the Fallon station.
+- **Proposed the website design:** a simple, farmer-friendly static page with a monthly chart of heat days, rain and
+  frost with Jul–Aug highlighted, "what's changed" cards, a data-limits box, a crop trait table, and a comparison of
+  the current rotation with alternatives, each with why, evidence, benefits, data gaps and risks.
+- **Directed the build:** asked for each part of the challenge brief to be covered and for one feature that sets the
+  tool apart, decided which numbers to keep when two downloads disagreed, and published the site on GitHub Pages.
+
+### What the AI did
+
+- **Wrote the code** for the page to that design: `index.html`, `styles.css`, `app.js`, `compare.js`, `extras.js`,
+  and this README. Our two download scripts, `scripts/get_power.py` and `scripts/get_data.py`, were also written with AI help.
+- **Added the non-NASA sources:** found and queried the USDA soil survey and the USDA Cropland Data Layer
+  (`scripts/get_soil.py`, `scripts/get_crop_history.py`), and found the extension and agency publications behind the crop numbers.
+- **Chose the study field** by scanning the USDA crop map, after the first NDVI point turned out to be in town.
+- **Processed the downloads:** summarized the MODIS and SMAP files (`scripts/summarize_appeears.py`) and calculated
+  evaporation demand from a further NASA POWER download (`scripts/get_water_balance.py`).
+- **Drafted the crop content** in `data/crops.json`: crop traits, the rotation options, and their benefits, risks and
+  data gaps. It then checked those numbers against published sources (linked in the file and on the page) and corrected
+  several. These are **not** NASA data. Items without a local source are marked "Partly".
+- **Proposed the scoring method** (see "How the scores work"), including the heat-sensitivity, market and ease
+  ratings. These are judgment values, labelled "our rating".
+- **Proposed and built the 35-year stress test**, the map, and the glossary and explainer text. The stress test's
+  assumptions are listed on the page and above.
+
+### What the AI did not do
+
+It did not create or change any NASA or USDA data. Every climate, satellite and soil number on the page is read from
+the files in `data/`, which the scripts produce from NASA and USDA downloads.
+
+### Human review
+
+Our team reviewed and edited the AI-assisted code and text, checked the numbers shown against the data files, and
+approved the plain-language explanations. Each AI-assisted source file includes a comment saying so.
