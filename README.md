@@ -330,5 +330,4 @@ the files in `data/`, which the scripts produce from NASA and USDA downloads.
 
 ### Human review
 
-Our team reviewed and edited the AI-assisted code and text, checked the numbers shown against the data files, and
-approved the plain-language explanations. Each AI-assisted source file includes a comment saying so.
+We have reviewed and edited the AI-generated codes and texts, verified that the numbers presented match the data files, and approved the clear language descriptions. This is indicated in the comments within each AI-generated source file.
