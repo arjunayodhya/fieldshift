@@ -11,35 +11,80 @@ has changed on their land and find a crop rotation that fits their soil, their w
   from 2017 to 2024, with alfalfa on all sides out to 250 m. It is an example field picked from the map, not a
   specific farmer's field.
 
+## What makes it different: the 35-year stress test
+
+Most tools built on NASA POWER show averages. Averages hide the bad years, and bad years are what break a farm.
+This tool **replays every real year since 1991** against each rotation and against the water the farmer says they
+can count on, and shows a scorecard: one square per year, per rotation, marked enough / short / very short.
+
+With 42 in of water (3.5 acre-feet), the current alfalfa plan would have run short in **23 of the last 35 years**.
+Skipping Jul–Aug irrigation would have run short in **none**. The farmer moves the water slider and clicks any year
+to see what that summer would have done to each rotation.
+
+How it works: each rotation's normal water need (middle of its sourced range) is scaled by how much evaporation
+demand (ET0, calculated from NASA POWER with the FAO-56 Penman-Monteith method) differed from normal that year, in
+the months that rotation is irrigated. Limits, also stated on the page: the water supply is held the same every
+year (real droughts cut supply when demand is highest), rain is ignored, and it is a simple stated model, not a forecast.
+
+Check on the ET0 calculation: it gives 53–54 in a year at Fallon; the Nevada state report (Huntington & Allen 2010)
+gives 49 in (4.1 ft) from station data.
+
 ## How it answers the challenge
 
 | The challenge asks for | Where it is in the tool |
 |---|---|
-| NASA Earth observations | NASA POWER (35 years of temperature, frost, heat, soil wetness), GPM IMERG satellite rain, and, once downloaded, MODIS NDVI and SMAP soil moisture |
+| NASA Earth observations | NASA POWER (temperature, frost, heat, humidity, wind, sunlight, soil wetness), GPM IMERG rain, MODIS NDVI, SMAP soil moisture, NASA GIBS map imagery |
 | Local soil information | USDA soil survey (SSURGO) for the study field: texture, salt, organic matter, water-holding capacity, drainage |
 | Crop characteristics | Crop traits table with linked sources |
-| Farmer priorities | Five sliders (water, heat, soil health, known buyers, ease of change) that re-rank the rotations |
-| Rotation strategies | Five multi-year rotations, including break-crop years |
-| Strengthen soil health | A soil health score for each rotation, built on the USDA NRCS soil health principles |
-| Adapt to changing conditions | "What's changed" cards and evidence tying each rotation to the Jul–Aug heat |
+| Farmer priorities | Five priority sliders, a "water I can count on" slider, and an "I sell to horse owners" market constraint |
+| Rotation strategies | Five multi-year rotations including the current one, each with why, evidence, benefits, risks to check locally, and data gaps |
+| Strengthen soil health | Soil health score per rotation (USDA NRCS principles), bare-field months, and what each rotation does for the soil |
+| Adapt to changing conditions | "What's changed" cards, Jul–Aug heat evidence, and the 35-year stress test |
+
+Optional items the challenge lists, and where they are:
+
+| Challenge item | Status |
+|---|---|
+| Temperature, heat stress, frost risk | Month-by-month chart and cards (NASA POWER) |
+| Rainfall and extreme precipitation | Rain chart (GPM IMERG) and a heavy-rain-days card |
+| Evaporation and water balance | "Water the air takes vs water the sky gives" chart; ET0 card |
+| Soil moisture | SMAP chart and POWER root-zone wetness |
+| Vegetation stress | MODIS NDVI at the study field, compared with hot and cool summers |
+| Times when fields are bare | "Months the field is bare" row for each rotation |
+| When current crops are most vulnerable | Jul–Aug highlighted throughout |
+| Pest cycles, water demand, soil benefits | "What it does for the soil" row; break-year rotations |
+| Explain scientific terms | "What the words mean" glossary |
+| Satellite vs ground measurements | Explainer with three examples from this site |
+| Datasets with different resolutions | Table of pixel size, time step and how each is fitted to site and month |
+| Interactive map over time | NASA MODIS greenness map with year and month controls |
+| Scenario sliders | Stress test water slider and year picker |
+| Farmer constraints | Water supply and market constraint |
+| Uncertainty and need for local review | "How sure?" ratings, data gaps, "Partly" flags, closing reminder |
+| Supports, does not replace, judgment | Stated at the top of the rotation section and at the end of the page |
+
+Not included: long-term groundwater trends (GRACE), land-surface temperature (ECOSTRESS), elevation (SRTM), and
+field-level maps of erosion or frost zones. The challenge lists these as optional.
 
 ## What the page shows
 
-1. **Month by month.** Very hot days (≥ 35 °C / 95 °F), frost days, and rain/snow for each month,
+1. **Month by month.** Very hot days (≥ 35 °C / 95 °F), frost days, rain/snow, and evaporation demand against rain for each month,
    with Jul–Aug (peak heat stress) shaded. You can switch between the last 10 years, 1991–2015, and all 35 years.
 2. **What satellites see on the ground.** MODIS crop greenness (NDVI) and SMAP topsoil moisture by month.
    This section appears only when `data/field_summary.json` exists.
-3. **What's changed.** Cards comparing 2016–2025 with 1991–2015, with a "How sure?" rating from the 35-year trend.
-4. **Your soil.** What the USDA soil survey maps at the site, and what it means for crop choice.
-5. **Find a rotation that fits your farm.**
+3. **See the valley from space.** A map of NASA MODIS greenness for any month since 2001, with the climate point and study field marked.
+4. **What's changed.** Eight cards comparing 2016–2025 with 1991–2015, with a "How sure?" rating from the 35-year trend.
+5. **Your soil.** What the USDA soil survey maps at the site, and what it means for crop choice.
+6. **Find a rotation that fits your farm.**
    - *What matters most to you?* Five sliders. The ranking and the default comparison update as they move, and the
      settings are remembered in the browser.
+   - *Stress test.* The 35-year scorecard described above.
    - *All options at a glance.* Field calendars for each phase of the rotation, average water per year, Jul–Aug water,
      very hot days while irrigating, soil health score, and effort to switch.
    - *Look closer.* The current plan next to one option: **why, evidence from NASA data, soil health, notes for
      your soil, benefits, risks, and data gaps**.
-6. **Crop traits.** Season, base temperature, heat and frost tolerance, water use, salt tolerance, market, and sources.
-7. **Data limits.** Plain-language caveats, taken from `data_notes` in the data file.
+7. **Crop traits.** Season, base temperature, heat and frost tolerance, water use, salt tolerance, market, and sources.
+8. **Understand the data.** Glossary, satellite vs ground measurements, and how sources with different pixel sizes are fitted together.
+9. **Data limits.** Plain-language caveats, taken from `data_notes` in the data file.
 
 The rotations compared:
 
@@ -95,6 +140,7 @@ Key findings for this site:
 | File | Made by | What it is |
 |---|---|---|
 | `data/power_summary.json` | `scripts/get_power.py` | 35 years (1991–2025) of NASA POWER daily data, summarized: monthly normals, frost season, heat days, GDD, recent-vs-past, trends, `data_notes` |
+| `data/water_balance.json` | `scripts/get_water_balance.py` | NASA POWER daily data 1991–2025 turned into evaporation demand (ET0), very hot days and heavy-rain days for every month of every year. Feeds the water balance chart and the stress test. No login needed |
 | `data/field.json` | `scripts/get_crop_history.py` | USDA NASS Cropland Data Layer: crop mapped at the study field each year 2015–2025, and a check that the field is big enough for a 250 m pixel. No login needed |
 | `data/soil.json` | `scripts/get_soil.py` | USDA NRCS soil survey (SSURGO) for the study field: texture, salt (EC), organic matter, pH, water-holding capacity, drainage. No login needed |
 | `data/crops.json` | hand-written (AI-assisted) | Crop traits, multi-year rotations, scoring notes, linked sources. **Not NASA data** (see source check below) |
@@ -148,6 +194,19 @@ Sources with `"read": "summary"` in `crops.json` were checked from a search summ
 A team member should open those links and confirm before submission. The deficit-irrigation trials were in northern
 California and Oregon, not Nevada.
 
+### Two NASA POWER downloads that differ slightly
+
+`data/power_summary.json` (our first download) and `data/water_balance.json` (downloaded 2026-11-15) do not match exactly:
+
+- Daily temperatures in the newer download run about 0.4 °C cooler. It counts about 33 → 50 very hot days a year
+  where the first file has 36 → 54. The rise is the same in both (about +17 days a year).
+- On 2026-11-15 the POWER API returned only missing values for GPM IMERG rain (`IMERG_PRECTOT`), so the satellite
+  rain on the page still comes from the first file.
+
+We kept the first file for the headline numbers and the rain, and use the newer one only for evaporation demand and
+the stress test. We have not found the cause (possibly a different time standard or a POWER update). Do not re-run
+`get_power.py` without checking that satellite rain comes back, or the rain chart will lose its satellite bars.
+
 ### Regenerating the data
 
 ```bash
@@ -172,7 +231,7 @@ When the AppEEARS job has finished and the CSVs are in `data/raw/`, build the su
 python scripts/summarize_appeears.py
 ```
 
-The soil and crop-history lookups need no login:
+The soil, crop-history and water-balance scripts need no login:
 
 ```bash
 python scripts/get_soil.py
@@ -180,6 +239,10 @@ python scripts/get_soil.py
 
 ```bash
 python scripts/get_crop_history.py
+```
+
+```bash
+python scripts/get_water_balance.py
 ```
 
 Run all scripts from the repo root so output goes to `data/`. They need `pip install requests`.
@@ -197,7 +260,7 @@ Then open http://localhost:8000. With Node instead of Python: `npx http-server -
 ## Deploying (GitHub Pages)
 
 It's a static site with no build step. Push to GitHub, then go to **Settings → Pages → Deploy from branch** and choose `main` / root.
-Chart.js 4.4.1 loads from cdnjs.
+Chart.js 4.4.1 and Leaflet 1.9.4 load from cdnjs. Map imagery loads from NASA GIBS.
 
 ## Files
 
@@ -206,6 +269,7 @@ index.html      page layout
 styles.css      styles (light + dark mode)
 app.js          loads the JSON, draws climate charts, satellite section, cards, and limits
 compare.js      soil card, priorities, ranking and scores, rotation comparison, crop traits
+extras.js       water balance chart, 35-year stress test, NASA satellite map
 data/           power_summary.json (NASA climate), soil.json (USDA soil), crops.json (crops, rotations),
                 field_summary.json (NDVI + SMAP, optional)
 scripts/        Python data pipeline (POWER, AppEEARS, soil survey, AppEEARS summary)
@@ -229,6 +293,9 @@ As required by NASA Space Apps, we disclose our AI use:
   on the page) and corrected several. These are **not** NASA data. Items without a local source are marked "Partly".
 - **Scores:** The AI proposed the scoring method (see "How the scores work"), including the heat-sensitivity,
   market and ease ratings. These are judgment values, labelled "our rating", and need review by the team.
+- **Stress test and extras:** The AI proposed and wrote the 35-year stress test, the ET0 calculation
+  (`scripts/get_water_balance.py`), the map, and the glossary and explainer text. The stress test's assumptions are
+  listed on the page and above.
 - **Data scripts:** The AI also wrote `scripts/get_soil.py`, `scripts/get_crop_history.py` and
   `scripts/summarize_appeears.py`, and chose the study field by scanning the USDA crop map (method in
   `get_crop_history.py`).

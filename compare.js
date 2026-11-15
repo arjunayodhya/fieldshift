@@ -183,6 +183,9 @@ function metrics(rot) {
     market: rot.market_score,
     ease: rot.ease_score,
   };
+  // farmer constraint: sells to horse owners, and this rotation grows a crop horses cannot eat
+  const horseConflict = !!(state.constraints && state.constraints.horse) && crops.some((x) => x.not_for_horses);
+  if (horseConflict) scores.market = Math.round(scores.market * 0.4);
   const wsum = CRITERIA.reduce((a, c) => a + state.priorities[c.key], 0);
   const total = wsum === 0
     ? CRITERIA.reduce((a, c) => a + scores[c.key], 0) / CRITERIA.length
@@ -193,7 +196,31 @@ function metrics(rot) {
     peakShare: peakYears / T, crops, soilParts, scores, total,
     allVerified: crops.every((c) => c.verified === true),
     hasDeficit: rot.phases.some((p) => p.deficit),
+    horseConflict, bareMonths: 12 - cover / T, legumeShare: legYears / T,
   };
+}
+
+// months with no crop on the field, per phase (before any optional crop)
+function bareText(rot) {
+  const parts = rot.phases.map((p) => {
+    const empty = ALL_MONTHS.filter((m) => !phaseCovered(p).includes(m));
+    if (!empty.length) return null;
+    const opt = p.optional ? ` (unless ${cropById(p.optional.crop).name.toLowerCase()} is grown)` : "";
+    return `${rot.phases.length > 1 ? p.label + ": " : ""}${monthRange(empty)}${opt}`;
+  }).filter(Boolean);
+  return parts.length ? parts.join("; ") : "None: covered all year";
+}
+
+// what the rotation does for the soil, from crop traits
+function soilBenefits(m) {
+  const out = [];
+  if (m.legumeShare > 0) out.push("Fixes its own nitrogen (legume)");
+  if (m.crops.some((x) => x.deep_rooted)) out.push("Deep roots open up the soil");
+  if (m.crops.length > 1 && m.crops.some((x) => x.id === "alfalfa")) out.push("Break year interrupts the alfalfa pest and disease cycle");
+  if (m.crops.length > 1) out.push("Mix of crop types feeds different soil life");
+  if (m.bareMonths < 0.05) out.push("Ground covered all year (less wind erosion)");
+  if (m.crops.some((x) => x.heat_sensitivity < 0.5)) out.push("Includes a heat-tolerant crop");
+  return out;
 }
 
 const peakText = (share) =>
@@ -317,6 +344,15 @@ function drawPriorities() {
              aria-valuetext="${LEVELS[state.priorities[c.key]]}">
       <span class="prio-value" id="prio-val-${c.key}">${LEVELS[state.priorities[c.key]]}</span>
     </label>`).join("");
+  const horse = document.getElementById("con-horse");
+  horse.checked = state.constraints.horse;
+  if (!box.dataset.wired) {
+    horse.addEventListener("change", () => {
+      state.constraints.horse = horse.checked;
+      state.comparePicked = false;
+      drawRanking(); drawCompareControls(); drawRotationDetail();
+    });
+  }
   if (!box.dataset.wired) {
     box.dataset.wired = "1";
     box.addEventListener("input", (e) => {
@@ -341,6 +377,15 @@ function ranked() {
     .sort((a, b) => b.m.total - a.m.total);
 }
 
+// extra lines under a ranked rotation: water stress test result and constraint conflicts
+function rankFlags(rot, m) {
+  const out = [];
+  const st = typeof stressShortYears === "function" ? stressShortYears(rot) : null;
+  if (st) out.push(`Stress test: short on water in <b>${st.short} of ${st.of}</b> past years with ${waterLabel(state.stress.water)}`);
+  if (m.horseConflict) out.push("<b>Not for horse buyers:</b> includes sorghum-sudangrass, which horses cannot eat");
+  return out.length ? `<div class="rank-flags">${out.map((x) => `<span>${x}</span>`).join("")}</div>` : "";
+}
+
 function drawRanking() {
   const list = ranked();
   const notes = state.crops.scoring_notes;
@@ -358,6 +403,7 @@ function drawRanking() {
         <span class="chip ${state.priorities[c.key] === 0 ? "off" : ""}" title="${notes[c.key]}">
           ${c.short} <b>${Math.round(m.scores[c.key])}</b><i class="mini"><i style="width:${m.scores[c.key].toFixed(0)}%"></i></i></span>`).join("")}
       </div>
+      ${rankFlags(rot, m)}
     </li>`).join("");
   document.getElementById("ranking-note").textContent = noneSet
     ? "Everything is set to \"Not important\", so all five are weighted equally."
@@ -384,6 +430,8 @@ function drawRotationOverview() {
       ${row("Crop heat tolerance", (r, m) => m.crops.map((c) => `${c.short}: ${c.heat_short}`).join("<br>"))}
       ${row("Soil health score", (r, m) => `<b>${Math.round(m.scores.soil)}</b>/100` +
         `<span class="row-sub">${m.soilParts.cover.detail} covered; ${m.soilParts.disturb.detail}; ${m.soilParts.diversity.detail}</span>`, "from USDA soil health principles")}
+      ${row("Months the field is bare", (r, m) => `<b>${m.bareMonths.toFixed(1)}</b> a year<span class="row-sub">${bareText(r)}</span>`, "bare ground can blow away and loses organic matter")}
+      ${row("What it does for the soil", (r, m) => soilBenefits(m).map((x) => `<span class="benefit">${x}</span>`).join("") || "—")}
       ${row("Rain while irrigating", (r, m) => rainShort(m.rain), "GPM IMERG satellite, per year")}
       ${row("Effort to switch", (r) => r.switch_effort.split(":")[0])}
     </tbody>`;
@@ -423,7 +471,7 @@ function rotationDetail(rot, facts) {
         `<li><span>${p.label}</span><span class="part-detail">${p.detail}</span><b>${Math.round(p.score)}</b></li>`).join("")}</ul>
       ${cautions.length ? `<h4>For your soil</h4>${list(cautions)}` : ""}
       <h4>Benefits</h4>${list(rot.benefits)}
-      <h4>Risks</h4>${list(rot.risks)}
+      <h4>Risks to check with a local expert</h4>${list(rot.risks)}
       <h4>Data gaps</h4>${list(rot.data_gaps)}
       <p class="unverified-note">Market: ${rot.market_note} (our rating).
         ${m.allVerified ? "" : `Some crop numbers for this option are only <span class="unverified">partly</span> backed by sources. See the crop table.`}</p>

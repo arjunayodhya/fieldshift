@@ -100,7 +100,9 @@
       "legume": true,
       "salt_threshold_dsm": 2,
       "salt_slope_pct": 7.3,
-      "heat_sensitivity": 1
+      "heat_sensitivity": 1,
+      "deep_rooted": true,
+      "not_for_horses": false
     },
     {
       "id": "triticale",
@@ -130,7 +132,9 @@
       "legume": false,
       "salt_threshold_dsm": 6.1,
       "salt_slope_pct": 2.5,
-      "heat_sensitivity": 1
+      "heat_sensitivity": 1,
+      "deep_rooted": false,
+      "not_for_horses": false
     },
     {
       "id": "teff",
@@ -160,7 +164,9 @@
       "legume": false,
       "salt_threshold_dsm": null,
       "salt_slope_pct": null,
-      "heat_sensitivity": 0.3
+      "heat_sensitivity": 0.3,
+      "deep_rooted": false,
+      "not_for_horses": false
     },
     {
       "id": "sudan",
@@ -193,7 +199,9 @@
       "legume": false,
       "salt_threshold_dsm": 2.8,
       "salt_slope_pct": 4.3,
-      "heat_sensitivity": 0.2
+      "heat_sensitivity": 0.2,
+      "deep_rooted": false,
+      "not_for_horses": true
     }
   ],
   "rotations": [
@@ -532,6 +540,7 @@
     "soil": "Average of five parts based on the USDA NRCS soil health principles: months the ground has a crop on it, how seldom it is replanted, number of different crops, share of years with a legume, and how well the crops tolerate the salt level in your soil survey.",
     "market": "Our rating of how established the buyers are. Check local prices.",
     "ease": "Our rating: no change = 100, same crop managed differently = 80, new crops = 45.",
-    "optional_share": "Where teff is 'only in good water years', scores assume teff is grown in 1 of every 2 years."
+    "optional_share": "Where teff is 'only in good water years', scores assume teff is grown in 1 of every 2 years.",
+    "constraints": "If you tick 'I sell hay to horse owners', the market score of any rotation with sorghum-sudangrass is cut to 40% of its value, because horses cannot eat it."
   }
 }

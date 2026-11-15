@@ -15,12 +15,14 @@ const DATA_URL = "data/power_summary.json";
 
 // ---------- state ----------
 const state = {
-  data: null, crops: null, soil: null, field: null,
+  data: null, crops: null, soil: null, field: null, water: null,
   units: "us", period: "recent", charts: {}, fieldCharts: {},
   compareWith: null, comparePicked: false, priorities: null,
+  stress: null, constraints: { horse: false },
 };
 const CROPS_URL = "data/crops.json";
 const FIELD_URL = "data/field_summary.json"; // optional: MODIS NDVI + SMAP (scripts/summarize_appeears.py)
+const WATER_URL = "data/water_balance.json"; // optional: ET0, heavy rain, per-year months (scripts/get_water_balance.py)
 const SOIL_URL = "data/soil.json";          // optional: USDA soil survey (scripts/get_soil.py)
 
 // ---------- unit helpers ----------
@@ -51,7 +53,7 @@ function tokens() {
   return {
     ink: v("--ink"), ink2: v("--ink-2"), ink3: v("--ink-3"), grid: v("--grid"),
     surface: v("--surface"), peak: v("--peak"), peakInk: v("--peak-ink"),
-    frost: v("--frost"), heat: v("--heat"), rainSat: v("--rain-sat"), rainModel: v("--rain-model"),
+    frost: v("--frost"), heat: v("--heat"), rainSat: v("--rain-sat"), rainModel: v("--rain-model"), et0: v("--et0"),
   };
 }
 
@@ -121,6 +123,7 @@ function drawCharts() {
   const labels = months.map((m) => m.name);
   const t = tokens();
   Object.values(state.charts).forEach((c) => c.destroy());
+  state.charts = {};
 
   document.getElementById("days-sub").textContent =
     `Average days per month, ${PERIODS[state.period].label}. Hot = ${heatLabel()} or more. Frost = below ${frostLabel()}.`;
@@ -173,6 +176,7 @@ function drawCharts() {
   });
 
   drawTable(months);
+  if (typeof drawWaterBalance === "function") drawWaterBalance(); // extras.js
 }
 
 function drawTable(months) {
@@ -394,6 +398,7 @@ function render() {
   drawCards();
   drawLimits();
   if (typeof drawCompare === "function") drawCompare(); // compare.js
+  if (typeof drawExtras === "function") drawExtras();   // extras.js
 }
 
 // ---------- controls ----------
@@ -421,8 +426,8 @@ async function init() {
     };
     // optional files: the page still works without them
     const optional = (url) => getJSON(url).catch(() => null);
-    [state.data, state.crops, state.soil, state.field] = await Promise.all(
-      [getJSON(DATA_URL), getJSON(CROPS_URL), optional(SOIL_URL), optional(FIELD_URL)]);
+    [state.data, state.crops, state.soil, state.field, state.water] = await Promise.all(
+      [getJSON(DATA_URL), getJSON(CROPS_URL), optional(SOIL_URL), optional(FIELD_URL), optional(WATER_URL)]);
   } catch (err) {
     const box = document.getElementById("load-error");
     box.hidden = false;

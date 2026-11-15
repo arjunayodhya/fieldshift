@@ -12,6 +12,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Field Shift: Fallon Farm Climate</title>
   <meta name="description" content="How the climate has changed at an alfalfa farm near Fallon, Nevada, using 35 years of NASA POWER data.">
+  <!-- Leaflet 1.9.4 (pinned) for the NASA satellite map -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -66,6 +68,15 @@
           The satellite bars (GPM IMERG, 2001 on) match the Fallon weather station (~5 in/yr) better than the model line, which reads too wet.</p>
       </figure>
 
+      <figure class="card chart-card" id="wb-figure" hidden>
+        <figcaption>
+          <h3>Water the air takes vs water the sky gives</h3>
+          <p class="sub" id="wb-sub"></p>
+        </figcaption>
+        <div class="chart-box short"><canvas id="wb-chart" role="img" aria-label="Bar chart of monthly evaporation demand next to monthly rain and snow"></canvas></div>
+        <p class="note" id="wb-note"></p>
+      </figure>
+
       <details class="card table-card">
         <summary>Show the numbers</summary>
         <div class="table-scroll"><table id="month-table"></table></div>
@@ -95,6 +106,27 @@
         <ul class="plain" id="field-findings"></ul>
         <p class="sub"><strong>Keep in mind:</strong></p>
         <ul class="plain small" id="field-notes"></ul>
+      </div>
+    </section>
+
+    <!-- 1c. NASA satellite map (needs the Leaflet library; hidden if it does not load) -->
+    <section aria-labelledby="h-map" id="map-section" hidden>
+      <div class="section-head">
+        <div>
+          <h2 id="h-map">See the valley from space</h2>
+          <p class="sub">NASA MODIS crop greenness for any month since 2001. Green patches are irrigated fields; tan is desert.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="map-controls">
+          <label>Year <select id="map-year" aria-label="Year"></select></label>
+          <label>Month <input type="range" id="map-month" min="1" max="12" step="1" value="7" aria-label="Month"></label>
+          <span class="map-date" id="map-date"></span>
+          <span class="ndvi-key">bare <i></i> dense green</span>
+        </div>
+        <div id="map" role="application" aria-label="Map of crop greenness around Fallon, Nevada"></div>
+        <p class="note">Slide through the months to watch the fields green up in spring and fade in fall, or compare a hot year (2021) with a cooler one (2023).
+          Each square is about 250 m across. Use the + and − buttons to zoom. Imagery: NASA GIBS.</p>
       </div>
     </section>
 
@@ -140,6 +172,9 @@
           <h3>What matters most to you?</h3>
           <p class="sub">Set each one. The ranking updates as you move them.</p>
           <div id="priority-controls"></div>
+          <label class="check"><input type="checkbox" id="con-horse">
+            <span><strong>I sell hay to horse owners.</strong> Flags rotations with a crop horses can't eat.</span></label>
+          <p class="sub">Set how much water you can count on in the stress test below.</p>
         </div>
         <div class="card">
           <h3>Best fit for your priorities</h3>
@@ -150,6 +185,36 @@
             <ul id="scoring-notes"></ul>
           </details>
         </div>
+      </div>
+
+      <div class="card" id="stress-section" hidden>
+        <p class="eyebrow">Stress test</p>
+        <h3>How would each rotation have held up over 35 real years?</h3>
+        <p class="sub">Averages hide the bad years. This replays every year since 1991, using NASA weather for that year, against the water you can count on.</p>
+        <div class="stress-controls">
+          <label for="stress-water"><span class="prio-label">Water I can count on</span>
+            <input type="range" id="stress-water" min="15" max="60" step="1" value="42">
+            <span class="prio-value" id="stress-water-val"></span></label>
+          <div>
+            <span class="prio-label">Look at one year</span>
+            <div class="seg seg-wrap" id="stress-presets" role="group" aria-label="Year to look at"></div>
+            <span class="prio-value">or click any square below</span>
+          </div>
+        </div>
+        <p class="stress-headline" id="stress-headline"></p>
+        <div class="sg-legend" aria-hidden="true">
+          <span><i class="sg-cell l0 inline"></i> enough water</span>
+          <span><i class="sg-cell l1 inline"></i> short</span>
+          <span><i class="sg-cell l2 inline"></i> very short (over 15%)</span>
+        </div>
+        <div class="table-scroll"><div class="sg" id="stress-grid"></div></div>
+        <h4 class="stress-h" id="stress-year-title"></h4>
+        <p class="sub" id="stress-year-sub"></p>
+        <div class="table-scroll"><table id="stress-table" class="grid-table"></table></div>
+        <details class="how">
+          <summary>How the stress test works, and its limits</summary>
+          <ul id="stress-notes"></ul>
+        </details>
       </div>
 
       <div class="card table-card">
@@ -181,6 +246,67 @@
       </details>
     </section>
 
+    <!-- 6. Understand the data -->
+    <section aria-labelledby="h-explain">
+      <div class="section-head"><h2 id="h-explain">Understand the data</h2></div>
+
+      <details class="card explain">
+        <summary>What the words mean</summary>
+        <dl>
+          <dt>Evapotranspiration (ET) and ET0</dt>
+          <dd>Water that leaves a field, both by evaporating from the soil and by passing through the plants. ET0 is the standard yardstick: how much a well-watered grass field would lose. Hotter, drier, windier, sunnier days mean higher ET0.</dd>
+          <dt>Water balance</dt>
+          <dd>Water coming in (rain, snow, irrigation) minus water going out (ET). Here rain covers about a tenth of what the air takes, so irrigation fills the rest.</dd>
+          <dt>NDVI (greenness index)</dt>
+          <dd>A satellite measure of how much healthy green leaf covers the ground. Near 0 is bare soil; 0.8 or more is a dense green crop. It drops after each hay cutting and when plants are stressed.</dd>
+          <dt>Soil moisture, and "wetter or drier than normal"</dt>
+          <dd>How much of the soil is water. A soil moisture anomaly is the difference from what is usual for that time of year, which is how a dry spell shows up.</dd>
+          <dt>Frost-free season and frost risk</dt>
+          <dd>The stretch between the last spring frost and the first fall frost. Frost-tender crops like teff and sorghum-sudangrass have to fit inside it.</dd>
+          <dt>Growing degree days (GDD)</dt>
+          <dd>A running total of warmth above the temperature where a crop starts growing. More GDD means faster growth and an earlier harvest.</dd>
+          <dt>Soil salt (EC)</dt>
+          <dd>Electrical conductivity, a measure of salt in the soil. Each crop has a level above which yield starts to fall.</dd>
+          <dt>Nitrogen-fixing crop (legume)</dt>
+          <dd>Crops like alfalfa host bacteria that take nitrogen from the air. They need little nitrogen fertilizer and leave some behind for the next crop.</dd>
+          <dt>Cover crop</dt>
+          <dd>A crop grown mainly to keep the ground covered between cash crops. It holds soil against wind and water and adds organic matter.</dd>
+          <dt>Deep-rooted crop</dt>
+          <dd>Roots that reach several feet down open channels for water and air, and reach water that shallow crops can't.</dd>
+          <dt>Drought- and heat-tolerant crop</dt>
+          <dd>Crops such as sorghum-sudangrass and teff keep growing in heat that slows alfalfa, and some can pause in a dry spell and recover.</dd>
+        </dl>
+      </details>
+
+      <details class="card explain">
+        <summary>Satellite numbers vs numbers measured on the ground</summary>
+        <p>Satellites and weather models cover every place and every year, but they see large squares, not your field. Ground measurements are exact for one spot but sparse. Using both shows where to trust each. Three examples from this site:</p>
+        <ul>
+          <li><strong>Rain:</strong> the NASA weather model says about 8 in a year here. The GPM IMERG satellite says about 5.6 in, and the Fallon weather station records about 5 in. So this page uses the satellite for rain.</li>
+          <li><strong>Crop greenness:</strong> the first satellite point we tried fell on the town of Fallon and read like bare ground. A USDA crop map was needed to find a real alfalfa field. A satellite number means little until you know what is on the ground there.</li>
+          <li><strong>Soil:</strong> SMAP senses only the top 2 in of soil over a 6-mile square. The USDA soil survey, made by people digging pits, tells you texture, salt and depth for a mapped field. A lab test of your own soil beats both.</li>
+        </ul>
+        <p>Where they disagree, or where no ground number exists, this page says so in the data gaps.</p>
+      </details>
+
+      <details class="card explain">
+        <summary>How data with different pixel sizes is fitted together</summary>
+        <p>Each source sees the land at a different scale and time step. Everything is brought to the same two units, <strong>one site</strong> and <strong>one month</strong>, before it is compared.</p>
+        <div class="table-scroll"><table class="fit-table">
+          <thead><tr><th scope="col">Source</th><th scope="col">Square size</th><th scope="col">How often</th><th scope="col">Years used</th><th scope="col">How it is fitted</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">NASA POWER (weather)</th><td>About 50 km</td><td>Daily</td><td>1991–2025</td><td>Daily values counted or averaged into months and years. Treated as valley-wide.</td></tr>
+            <tr><th scope="row">GPM IMERG (rain)</th><td>About 10 km</td><td>Daily</td><td>2001–2025</td><td>Summed into months.</td></tr>
+            <tr><th scope="row">SMAP (soil moisture)</th><td>About 9 km</td><td>Daily, with gaps</td><td>2015–2026</td><td>Usable days averaged into months.</td></tr>
+            <tr><th scope="row">MODIS NDVI (greenness)</th><td>250 m</td><td>Every 16 days</td><td>2017–2024</td><td>One pixel inside the study field, cloudy readings dropped, averaged into months. Only alfalfa years kept.</td></tr>
+            <tr><th scope="row">USDA soil survey</th><td>Mapped field by field</td><td>Fixed</td><td>n/a</td><td>The soil type mapped at the study field.</td></tr>
+            <tr><th scope="row">USDA crop map</th><td>30 m</td><td>Yearly</td><td>2015–2025</td><td>Crop at the study field each year, used to pick the field and its alfalfa years.</td></tr>
+          </tbody>
+        </table></div>
+        <p>Coarse sources (weather, rain, soil moisture) describe the valley. Fine sources (greenness, soil, crop map) describe the study field. Rotation scores mix the two, so they are a guide for this area, not a measurement of any one field.</p>
+      </details>
+    </section>
+
     <!-- 5. Data limits -->
     <section aria-labelledby="h-limits">
       <div class="card limits">
@@ -191,6 +317,12 @@
     </section>
   </main>
 
+  <div class="wrap">
+    <p class="notice soft remind"><strong>This tool supports your judgment; it does not replace it.</strong>
+      It finds patterns in NASA and USDA data and lays out options. You know your field, water rights, equipment and buyers.
+      Before changing a rotation, talk with your extension office or a local agronomist, especially about the items listed under "Risks" and "Data gaps".</p>
+  </div>
+
   <footer class="wrap site-footer">
     <p>Data: NASA POWER (power.larc.nasa.gov) and GPM IMERG. Built for NASA Space Apps 2026, “Field Shift: Adapting Farms with NASA Data.”
       This site was built with help from an AI coding assistant; see the README for our AI-use note.</p>
@@ -199,6 +331,8 @@
   <!-- Chart.js 4.4.1 (pinned) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="compare.js"></script>
+  <script src="extras.js"></script>
 </body>
 </html>
