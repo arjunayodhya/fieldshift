@@ -300,6 +300,8 @@ Claude Code). This section says what our team did and what the AI did.
   the current rotation with alternatives, each with why, evidence, benefits, data gaps and risks.
 - **Proposed the scoring idea:** in a team brainstorm before the build, came up with scoring each rotation against
   what the farmer cares about, so the tool can rank rotations by farmer priorities.
+- **Proposed the stress-test idea:** in the same brainstorm, came up with testing each rotation against real past
+  years, bad ones included, instead of only showing averages.
 - **Directed the build:** asked for each part of the challenge brief to be covered and for one feature that sets the
   tool apart, decided which numbers to keep when two downloads disagreed, and published the site on GitHub Pages.
 
@@ -317,8 +319,9 @@ Claude Code). This section says what our team did and what the AI did.
   several. These are **not** NASA data. Items without a local source are marked "Partly".
 - **Built the scoring method the team proposed** (see "How the scores work"), and set the first values for the
   heat-sensitivity, market and ease ratings. These are judgment values, labelled "our rating".
-- **Proposed and built the 35-year stress test**, the map, and the glossary and explainer text. The stress test's
-  assumptions are listed on the page and above.
+- **Designed and built the 35-year stress test the team proposed:** worked out the method (scaling each rotation's
+  water need by that year's evaporation demand) and its cut-offs. Its assumptions are listed on the page and above.
+- **Built the map** and wrote the glossary and explainer text.
 
 ### What the AI did not do
 
