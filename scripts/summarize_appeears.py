@@ -21,6 +21,7 @@ from pathlib import Path
 RAW = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("data/raw")
 OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("data")
 POWER_SUMMARY = Path("data/power_summary.json")
+FIELD_INFO = Path("data/field.json")      # crop history of the study field (scripts/get_crop_history.py)
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 MIN_OBS_PER_YEAR = 6      # skip a year's summer value if it has almost no data
 SPARSE_NDVI = 0.5         # if NDVI never reaches this, the pixel is not a dense crop field
@@ -62,6 +63,17 @@ def pearson(xs, ys):
     if sxx == 0 or syy == 0:
         return None
     return round(sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / (sxx * syy) ** 0.5, 2)
+
+
+def csv_point(path):
+    """Latitude/longitude of the first row of an AppEEARS point CSV."""
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            try:
+                return round(float(r["Latitude"]), 4), round(float(r["Longitude"]), 4)
+            except (KeyError, ValueError, TypeError):
+                return None
+    return None
 
 
 def read_series(path, value_needles, lo, hi, quality=None):
@@ -135,8 +147,13 @@ def main():
         power_years = {y["year"]: y for y in ps.get("yearly", [])}
 
     # ---------- MODIS NDVI ----------
-    ndvi_csv = find_csv("MOD13Q1")
+    # prefer the study-field download (fieldshift-field-...) over the first, town-point one
+    ndvi_csv = find_csv("field-", "MOD13Q1") or find_csv("MOD13Q1")
     if ndvi_csv:
+        point = csv_point(ndvi_csv)
+        field = json.loads(FIELD_INFO.read_text()) if FIELD_INFO.exists() else None
+        on_field = bool(field and point and abs(point[0] - field["lat"]) < 0.002 and abs(point[1] - field["lon"]) < 0.002)
+        alfalfa_years = set(field["alfalfa_years"]) if on_field else None
         # AppEEARS applies the scale factor, so NDVI is -0.2..1 (fill value becomes -0.3).
         # VI_Quality MODLAND bits: 0b00 = good, 0b01 = usable (check other QA),
         # 0b10 = probably cloudy, 0b11 = not produced. Keep the first two.
@@ -146,6 +163,11 @@ def main():
         # Dense irrigated crops read well above 0.5 at peak. If this pixel never
         # does, it is mostly not cropland and says little about the crop itself.
         sparse = highest is not None and highest < SPARSE_NDVI
+        if alfalfa_years:
+            # only the years the crop map says the field was alfalfa
+            all_years = sorted({y for y, _, _ in rows})
+            rows = [r for r in rows if r[0] in alfalfa_years]
+            print(f"[summarize] NDVI limited to alfalfa years {sorted(alfalfa_years)} (file has {all_years[0]}-{all_years[-1]})")
         monthly, yearly = monthly_and_yearly(rows)
         peak_month = max((m for m in monthly if m["value"] is not None), key=lambda m: m["value"], default=None)
         pairs = [(power_years[y["year"]]["heat_days"], y["peak_summer"]) for y in yearly
@@ -154,7 +176,11 @@ def main():
             "product": col.split("__")[0] if "__" in col else "MOD13Q1",
             "what": "NDVI crop greenness, 0 = bare soil, about 0.8+ = dense green crop. One 250 m pixel at the site point, every 16 days.",
             "years": [yearly[0]["year"], yearly[-1]["year"]] if yearly else None,
-            "observations_used": kept,
+            "point": {"lat": point[0], "lon": point[1]} if point else None,
+            "on_study_field": on_field,
+            "crop": "Alfalfa" if alfalfa_years else None,
+            "field": field if on_field else None,
+            "observations_used": len(rows),
             "observations_dropped": dropped,
             "quality_counts": qc,
             "highest_value": highest,
@@ -173,8 +199,12 @@ def main():
         if sparse:
             out["data_notes"].append(
                 f"The NDVI pixel at the site point never reads above {highest}. A dense irrigated crop reads much higher, so this pixel is mostly not cropland (bare ground, desert shrubs, buildings, or a mix). It cannot show how alfalfa responds to heat. To fix this, set LAT/LON in scripts/get_data.py to the middle of a real field and download again.")
+        if on_field:
+            fs_ = field["field_size_check"]
+            out["data_notes"].append(
+                f"The NDVI point is a study field picked from the USDA crop map: alfalfa in {min(alfalfa_years)}-{max(alfalfa_years)}, with {fs_['same_crop_250m']} of {fs_['of']} check points 250 m away also alfalfa. Only those alfalfa years are used. It is an example field, not a specific farmer's field.")
         out["data_notes"].append(
-            "NDVI is from one 250 m MODIS pixel at the site point. It may cover parts of several fields, roads or bare ground, so it shows the area's pattern, not one field's yield.")
+            "NDVI is from one 250 m MODIS pixel. It can include field edges, roads or a neighbouring field, and it shows greenness, not yield.")
         out["data_notes"].append(
             "Alfalfa is cut several times a summer, and each cutting drops NDVI for a couple of weeks. A summer dip can be cuttings, heat stress, or both.")
     else:

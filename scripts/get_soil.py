@@ -20,7 +20,7 @@ import requests
 
 # ---------------- settings (change these) ----------------
 SITE_ID = "fallon_nv"
-LAT, LON = 39.47, -118.78
+LAT, LON = 39.45, -118.80   # the study field (see scripts/get_crop_history.py), not the climate grid point
 OUT = Path("data")
 SDA = "https://sdmdataaccess.sc.egov.usda.gov/Tabular/post.rest"
 ROOT_ZONE_CM = 100   # depth used for the root-zone averages

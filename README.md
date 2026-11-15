@@ -3,14 +3,20 @@
 NASA Space Apps Challenge 2026 project. A decision-support web page that helps a farmer see how the climate
 has changed on their land and find a crop rotation that fits their soil, their water and their own priorities.
 
-**Site:** alfalfa farm area near Fallon, Nevada (39.47° N, 118.78° W).
+**Site:** alfalfa farm area near Fallon, Nevada.
+
+- **Climate point:** 39.47° N, 118.78° W (the NASA POWER grid cell, about 50 km across, covers the whole valley).
+- **Study field:** 39.45° N, 118.80° W, about 3 km away. The climate point itself sits in the town of Fallon, so soil and
+  crop greenness are taken at a real field instead. The USDA Cropland Data Layer maps this field as alfalfa every year
+  from 2017 to 2024, with alfalfa on all sides out to 250 m. It is an example field picked from the map, not a
+  specific farmer's field.
 
 ## How it answers the challenge
 
 | The challenge asks for | Where it is in the tool |
 |---|---|
 | NASA Earth observations | NASA POWER (35 years of temperature, frost, heat, soil wetness), GPM IMERG satellite rain, and, once downloaded, MODIS NDVI and SMAP soil moisture |
-| Local soil information | USDA soil survey (SSURGO) for the site point: texture, salt, organic matter, water-holding capacity, drainage |
+| Local soil information | USDA soil survey (SSURGO) for the study field: texture, salt, organic matter, water-holding capacity, drainage |
 | Crop characteristics | Crop traits table with linked sources |
 | Farmer priorities | Five sliders (water, heat, soil health, known buyers, ease of change) that re-rank the rotations |
 | Rotation strategies | Five multi-year rotations, including break-crop years |
@@ -75,22 +81,24 @@ Key findings for this site:
   and there is no link between hot years and summer greenness (r = −0.09, 11 years). The page says this plainly.
 - **Soil moisture (SMAP SPL3SMP_E, 2015–2026):** topsoil is driest in Jun–Sep (0.11) and wettest in winter (0.14).
   SMAP marks every reading used here as below its recommended quality, and 2,425 of 4,148 days had no usable reading.
-- **To get real crop evidence:** set LAT/LON in scripts/get_data.py to the middle of an actual field, delete
-  data/raw/appeears_task_fallon_nv.txt, and run the download and the summary again.
+- **Fix:** `scripts/get_data.py` now samples NDVI at the study field (see above) instead of the town point.
+  Run it again, then `python scripts/summarize_appeears.py`. The summary uses only the field's alfalfa years.
 
 ## Data
 
 | File | Made by | What it is |
 |---|---|---|
 | `data/power_summary.json` | `scripts/get_power.py` | 35 years (1991–2025) of NASA POWER daily data, summarized: monthly normals, frost season, heat days, GDD, recent-vs-past, trends, `data_notes` |
-| `data/soil.json` | `scripts/get_soil.py` | USDA NRCS soil survey (SSURGO) for the site point: texture, salt (EC), organic matter, pH, water-holding capacity, drainage. No login needed |
+| `data/field.json` | `scripts/get_crop_history.py` | USDA NASS Cropland Data Layer: crop mapped at the study field each year 2015–2025, and a check that the field is big enough for a 250 m pixel. No login needed |
+| `data/soil.json` | `scripts/get_soil.py` | USDA NRCS soil survey (SSURGO) for the study field: texture, salt (EC), organic matter, pH, water-holding capacity, drainage. No login needed |
 | `data/crops.json` | hand-written (AI-assisted) | Crop traits, multi-year rotations, scoring notes, linked sources. **Not NASA data** (see source check below) |
 | `data/raw/` | `scripts/get_data.py` | AppEEARS downloads (MODIS NDVI + SMAP soil moisture). Not committed |
 | `data/field_summary.json` | `scripts/summarize_appeears.py` | Monthly and yearly NDVI and SMAP summaries from the files in `data/raw/`. Optional: the page hides that section until this file exists |
 
 Sources: [NASA POWER](https://power.larc.nasa.gov) (Agroclimatology community), GPM IMERG via POWER,
-[AppEEARS](https://appeears.earthdatacloud.nasa.gov) for MODIS and SMAP, and
-[USDA NRCS Soil Data Access](https://sdmdataaccess.sc.egov.usda.gov/) for the soil survey.
+[AppEEARS](https://appeears.earthdatacloud.nasa.gov) for MODIS and SMAP, 
+[USDA NRCS Soil Data Access](https://sdmdataaccess.sc.egov.usda.gov/) for the soil survey, and the
+[USDA NASS Cropland Data Layer](https://nassgeodata.gmu.edu/CropScape/) for crop history.
 
 ### How the rotation evidence is built
 
@@ -158,10 +166,14 @@ When the AppEEARS job has finished and the CSVs are in `data/raw/`, build the su
 python scripts/summarize_appeears.py
 ```
 
-The soil lookup needs no login:
+The soil and crop-history lookups need no login:
 
 ```bash
 python scripts/get_soil.py
+```
+
+```bash
+python scripts/get_crop_history.py
 ```
 
 Run all scripts from the repo root so output goes to `data/`. They need `pip install requests`.
@@ -211,7 +223,9 @@ As required by NASA Space Apps, we disclose our AI use:
   on the page) and corrected several. These are **not** NASA data. Items without a local source are marked "Partly".
 - **Scores:** The AI proposed the scoring method (see "How the scores work"), including the heat-sensitivity,
   market and ease ratings. These are judgment values, labelled "our rating", and need review by the team.
-- **Data scripts:** The AI also wrote `scripts/get_soil.py` and `scripts/summarize_appeears.py`.
+- **Data scripts:** The AI also wrote `scripts/get_soil.py`, `scripts/get_crop_history.py` and
+  `scripts/summarize_appeears.py`, and chose the study field by scanning the USDA crop map (method in
+  `get_crop_history.py`).
 - **What it did not do:** It did not create or change any NASA data. Every climate number on the page is read from
   `data/power_summary.json`, which our Python scripts produce from NASA POWER downloads.
 - **Human review:** Our team reviewed and edited all AI-assisted code and text, checked the numbers shown

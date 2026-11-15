@@ -31,7 +31,13 @@ import requests
 
 # ---------------- settings (change these) ----------------
 SITE_ID = "fallon_nv"
-LAT, LON = 39.47, -118.78          # farm location
+LAT, LON = 39.47, -118.78          # climate site (NASA POWER grid point)
+# Study field for the AppEEARS point sample. The climate site above sits in
+# the town of Fallon (the USDA crop map calls it "Developed"), so NDVI there
+# is not a crop. This point is the middle of a field that was alfalfa
+# 2017-2024; see scripts/get_crop_history.py and data/field.json.
+FIELD_LAT, FIELD_LON = 39.45, -118.80
+GET_SMAP = False                   # SMAP is a ~9 km grid: the first download (kept in data/raw) still applies
 START = "2015-01-01"               # SMAP starts ~April 2015
 END = "2026-10-31"
 OUT = Path("data/raw")
@@ -39,7 +45,8 @@ POLL_SECONDS = 30
 
 POWER_PARAMS = ["T2M_MAX", "T2M_MIN", "PRECTOTCORR", "GWETROOT"]
 APPEEARS = "https://appeears.earthdatacloud.nasa.gov/api/"
-TASK_FILE = OUT / f"appeears_task_{SITE_ID}.txt"
+# the job id is remembered per point, so changing the field starts a new job
+TASK_FILE = OUT / f"appeears_task_{SITE_ID}_{FIELD_LAT}_{FIELD_LON}{'_smap' if GET_SMAP else ''}.txt"
 # ---------------------------------------------------------
 
 
@@ -130,22 +137,24 @@ def mdy(iso):
 
 def submit_task(h):
     ndvi_prod = latest_product("MOD13Q1")
-    smap_prod = latest_product("SPL3SMP_E")
     ndvi_layer = pick_layer(ndvi_prod, "_250m_16_days_NDVI")
-    smap_layer = pick_layer(smap_prod, "AM_soil_moisture")
-    print(f"[AppEEARS] layers: {ndvi_prod}/{ndvi_layer}, {smap_prod}/{smap_layer}")
+    layers = [{"product": ndvi_prod, "layer": ndvi_layer}]
+    if GET_SMAP:
+        smap_prod = latest_product("SPL3SMP_E")
+        smap_layer = pick_layer(smap_prod, "AM_soil_moisture")
+        layers.append({"product": smap_prod, "layer": smap_layer})
+    print("[AppEEARS] layers: " + ", ".join(f"{x['product']}/{x['layer']}" for x in layers))
+    print(f"[AppEEARS] point: {FIELD_LAT}, {FIELD_LON}")
 
     task = {
         "task_type": "point",
-        "task_name": f"fieldshift_{SITE_ID}",
+        # files are named after this: fieldshift-field-<product>-results.csv
+        "task_name": "fieldshift_field",
         "params": {
             "dates": [{"startDate": mdy(START), "endDate": mdy(END)}],
-            "layers": [
-                {"product": ndvi_prod, "layer": ndvi_layer},
-                {"product": smap_prod, "layer": smap_layer},
-            ],
+            "layers": layers,
             "coordinates": [
-                {"id": SITE_ID, "category": "farm", "latitude": LAT, "longitude": LON}
+                {"id": f"{SITE_ID}_field", "category": "field", "latitude": FIELD_LAT, "longitude": FIELD_LON}
             ],
         },
     }

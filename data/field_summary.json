@@ -2,7 +2,7 @@
   "source": "NASA AppEEARS point sample (appeears.earthdatacloud.nasa.gov)",
   "data_notes": [
     "The NDVI pixel at the site point never reads above 0.32. A dense irrigated crop reads much higher, so this pixel is mostly not cropland (bare ground, desert shrubs, buildings, or a mix). It cannot show how alfalfa responds to heat. To fix this, set LAT/LON in scripts/get_data.py to the middle of a real field and download again.",
-    "NDVI is from one 250 m MODIS pixel at the site point. It may cover parts of several fields, roads or bare ground, so it shows the area's pattern, not one field's yield.",
+    "NDVI is from one 250 m MODIS pixel. It can include field edges, roads or a neighbouring field, and it shows greenness, not yield.",
     "Alfalfa is cut several times a summer, and each cutting drops NDVI for a couple of weeks. A summer dip can be cuttings, heat stress, or both.",
     "SMAP marks 1723 of the 1723 readings used here as below its recommended quality, and 2425 days had no usable reading. Treat the soil moisture pattern as rough.",
     "SMAP sees only the top ~5 cm of soil over a ~9 km area. It does not show root-zone water or any single field."
@@ -21,6 +21,13 @@
       2015,
       2026
     ],
+    "point": {
+      "lat": 39.47,
+      "lon": -118.78
+    },
+    "on_study_field": false,
+    "crop": null,
+    "field": null,
     "observations_used": 264,
     "observations_dropped": 9,
     "quality_counts": {

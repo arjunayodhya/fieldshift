@@ -1,0 +1,39 @@
+{
+  "lat": 39.45,
+  "lon": -118.8,
+  "source": "USDA NASS Cropland Data Layer (CropScape), nassgeodata.gmu.edu/CropScape",
+  "crop_history": {
+    "2015": "Fallow/Idle Cropland",
+    "2016": "Fallow/Idle Cropland",
+    "2017": "Alfalfa",
+    "2018": "Alfalfa",
+    "2019": "Alfalfa",
+    "2020": "Alfalfa",
+    "2021": "Alfalfa",
+    "2022": "Alfalfa",
+    "2023": "Alfalfa",
+    "2024": "Alfalfa",
+    "2025": "Hemp"
+  },
+  "alfalfa_years": [
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "field_size_check": {
+    "year": 2024,
+    "crop": "Alfalfa",
+    "same_crop_125m": 7,
+    "same_crop_250m": 8,
+    "of": 8
+  },
+  "data_notes": [
+    "The Cropland Data Layer is a satellite-based map with 30 m squares. It is usually right for major crops like alfalfa but can be wrong in any one year.",
+    "This field was picked from the map to study how alfalfa looks from space. It is an example field, not a specific farmer's field."
+  ]
+}

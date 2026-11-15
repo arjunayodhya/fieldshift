@@ -226,7 +226,8 @@ function drawField() {
   if (f.ndvi) {
     const n = f.ndvi;
     document.getElementById("ndvi-sub").innerHTML =
-      `Average NDVI by month, ${n.years[0]}–${n.years[1]}. 0 = bare ground, 0.8 = dense green crop. One 250 m satellite pixel.` +
+      `Average NDVI by month, ${n.years[0]}–${n.years[1]}${n.crop ? ` (${n.crop.toLowerCase()} years)` : ""}. 0 = bare ground, 0.8 = dense green crop. One 250 m satellite pixel` +
+      (n.point ? ` at ${n.point.lat}°N, ${Math.abs(n.point.lon)}°W.` : ".") +
       (n.pixel_is_sparse ? ` <strong>Caution: this pixel is mostly not cropland.</strong>` : "");
     state.fieldCharts.ndvi = single("ndvi-chart", "line", "Greenness (NDVI)", n.monthly.map((m) => m.value), t.rainSat, "NDVI", 2, 1);
     const vals = n.monthly.filter((m) => m.value != null);
@@ -240,6 +241,10 @@ function drawField() {
       }
       findings.push("To get real crop evidence, download NDVI again for a point in the middle of an actual field.");
     } else {
+      if (n.on_study_field && n.field) {
+        const fsz = n.field.field_size_check;
+        findings.push(`This is a real alfalfa field picked from the USDA crop map: alfalfa every year ${n.years[0]}–${n.years[1]}, and alfalfa at ${fsz.same_crop_250m} of ${fsz.of} check points 250 m away. Its greenness peaks at <strong>${n.highest_value}</strong>.`);
+      }
       if (n.june_avg != null && n.jul_aug_avg != null) {
         const diff = n.jul_aug_avg - n.june_avg;
         const pct = Math.abs(Math.round((diff / n.june_avg) * 100));

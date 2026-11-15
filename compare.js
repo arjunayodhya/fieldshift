@@ -254,6 +254,15 @@ function drawSoil() {
   const means = [];
   if (s.texture === "sandy") {
     means.push(`<strong>Sandy soil holds little water</strong> (about ${held} in the top ${depth}). It needs lighter, more frequent irrigation, and crops feel a missed irrigation sooner.`);
+  } else if (s.texture === "loam") {
+    means.push(`<strong>Loam topsoil holds a fair amount of water</strong> (about ${held} in the top ${depth}), so crops can ride out a few days between irrigations.`);
+  } else if (s.texture === "clay") {
+    means.push(`<strong>Clay soil holds a lot of water</strong> (about ${held} in the top ${depth}) but takes it in slowly.`);
+  }
+  const deepSand = s.horizons.find((h) => h.top_cm >= 30 && h.sand_pct >= 85);
+  if (deepSand && s.texture !== "sandy") {
+    const at = isUS() ? `${Math.round(deepSand.top_cm / 2.54)} in` : `${Math.round(deepSand.top_cm)} cm`;
+    means.push(`<strong>There is a sand layer from about ${at} down</strong>. Water that gets past the topsoil drains away fast, so deep-rooted alfalfa finds less stored water down there.`);
   }
   means.push(over.length
     ? `<strong>Salt may limit ${over.map((c) => c.name.toLowerCase()).join(", ")}</strong>: the survey's ${ec} dS/m is above their limit.`
@@ -266,7 +275,7 @@ function drawSoil() {
   }
   const stat = (label, value, sub) => `<div class="stat"><span class="stat-label">${label}</span><span class="stat-value">${value}</span>${sub ? `<span class="row-sub">${sub}</span>` : ""}</div>`;
   box.innerHTML = `
-    <p class="eyebrow">USDA soil survey at the site point</p>
+    <p class="eyebrow">USDA soil survey at the study field (${s.site.lat}°N, ${Math.abs(s.site.lon)}°W)</p>
     <h3>${s.map_unit}</h3>
     <div class="stats">
       ${stat("Texture", `${Math.round(s.topsoil.sand_pct)}% sand`, `${Math.round(s.topsoil.silt_pct)}% silt, ${Math.round(s.topsoil.clay_pct)}% clay`)}
@@ -287,6 +296,8 @@ function soilCautions(rot, m) {
   const out = [];
   if (m.hasDeficit && s.texture === "sandy") {
     out.push(`Your soil is sandy (${Math.round(s.topsoil.sand_pct)}% sand). In the UC trials, hay losses from cutting water were bigger on lighter soils, so expect the high end of the loss range.`);
+  } else if (m.hasDeficit && s.texture === "loam") {
+    out.push("Your soil is loam. In the UC trials, hay losses from cutting water were bigger on loam and sandy loam than on the organic soils at Tulelake, so don't count on the low end of the loss range.");
   }
   const ec = s.root_zone.ec_dsm_max;
   m.crops.filter((c) => c.salt_threshold_dsm != null && ec > c.salt_threshold_dsm)
